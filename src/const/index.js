@@ -1,0 +1,6 @@
+const CANVAS_WIDTH = 800
+const CANVAS_HEIGHT = 500
+
+export {
+  CANVAS_HEIGHT, CANVAS_WIDTH
+}
