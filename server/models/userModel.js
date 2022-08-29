@@ -4,7 +4,6 @@ const userSchema = mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
     maxlength: 15
   },
   password: {
@@ -25,6 +24,7 @@ const userSchema = mongoose.Schema({
   },
   walletAddress: {
     type: String,
+    unique: true,
     default: ''
   },
   updatedAt: {

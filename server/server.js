@@ -1,19 +1,25 @@
 const express = require("express");
 require("dotenv").config();
+const bodyParser = require('body-parser');
 // const server = require('http').createServer(app)
 // const io = require('socket.io')(server)
 const connectDb = require('./config/connectDb');
 connectDb();
 
 const app = express();
+app.use(bodyParser.urlencoded({ limit: '50mb' }))
+app.use(bodyParser.json());
 const port = process.env.PORT || 5000;
 
 const gamesRouter = require("./routes/games");
 const usersRouter = require("./routes/users");
-app.use(express.json());
 app.use("/api/games", gamesRouter);
 app.use("/api/users", usersRouter);
 
+
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`);
+});
 
 // let roomData = {}
 

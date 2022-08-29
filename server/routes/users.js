@@ -1,10 +1,10 @@
 const router = require("express").Router();
-const User = require("../model/userModel");
+const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require("../middlewares/auth");
 
-router.post("/register", async (req, res) => {
+router.post('/register', async (req, res) => {
   //validation
   if (!req.body.name || !req.body.password) {
     return res.status(400).json({ msg: "Please enter all fields!" });
@@ -12,9 +12,8 @@ router.post("/register", async (req, res) => {
   if (req.body.name.length > 15) {
     return res.status(400).json({ msg: "Name length is 15 characters MAX!" });
   }
-  const user = await User.findOne({ name: req.body.name });
-  if (user) {
-    return res.status(400).json({ msg: "User already exists!" });
+  if (!req.body.walletAddress) {
+    return res.status(400).json({ msg: "Invalid wallet address" });
   }
 
   bcrypt.genSalt(10, function (err, salt) {
@@ -23,40 +22,33 @@ router.post("/register", async (req, res) => {
       const newUser = new User({
         name: req.body.name,
         password: hash,
+        walletAddress: req.body.walletAddress
       });
       newUser
         .save()
-        .then((user) => res.json(user))
+        .then((user) => {
+          const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+          res.json({
+            user,
+            token
+          })
+        })
         .catch((err) => res.status(400).json("Error: " + err));
     });
   });
 });
 
-router.post("/login", async (req, res) => {
-  //validation
-  if (!req.body.name || !req.body.password) {
-    return res.status(400).json({ msg: "Please enter all fields!" });
-  }
-  const user = await User.findOne({ name: req.body.name });
+router.post('/login', async (req, res) => {
+  const user = await User.findOne({ walletAddress: req.body.walletAddress });
   if (!user) {
-    return res.status(400).json({ msg: "User doesn't exist!" });
+    return res.status(200).json({ msg: "NOT_FOUND" })
+  } else {
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+    res.json({
+      token: token,
+      user: user,
+    });
   }
-
-  bcrypt.compare(req.body.password, user.password, function (err, response) {
-    if (!response) {
-      return res.status(400).send({ msg: "Authentication Error" });
-    } else {
-      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-      res.json({
-        token: token,
-        user: {
-          id: user._id,
-          name: user.name,
-          date: user.date,
-        },
-      });
-    }
-  });
 });
 
 router.get("/:id", auth, async (req, res) => {
