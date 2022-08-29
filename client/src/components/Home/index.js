@@ -1,12 +1,23 @@
 import { useRef, useEffect, useState } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../../const';
 import './home.css';
+import { hooks, metaMask } from "../../connectors/metaMask";
+import { chainId } from '../../constant/chain'
+import { useWeb3React } from "@web3-react/core";
+import Request from '../../Axios'
+import { Button, Form, Input } from 'antd';
+
+const {
+  useIsActive,
+} = hooks;
 
 let gameFrame = 0;
 
-function Home({ route, setRoute, userData }) {
+function Home({ route, setRoute, userData, setUserData, walletData, setWalletData }) {
   const canvasRef = useRef()
   const [ctx, setCtx] = useState()
+  const { connector } = useWeb3React();
+  const isActive = useIsActive();
 
   useEffect(() => {
     if (canvasRef && canvasRef.current) {
@@ -249,7 +260,7 @@ function Home({ route, setRoute, userData }) {
         player.draw();
         ctx.fillStyle = 'rgba(34,147,214,1)';
         ctx.font = '20px Georgia';
-        ctx.fillText('YOUR TURN: ', 10, 120);
+        ctx.fillText(`YOUR TURN:  ${userData && userData.playTurn ? userData.playTurn : '0'}`, 10, 120);
         gameFrame += 1;
         gameFrame = gameFrame >= 100 ? 0 : gameFrame
         if (route === '/') {
@@ -272,8 +283,33 @@ function Home({ route, setRoute, userData }) {
     }
   }, [ctx])
 
+
+  useEffect(() => {
+    const getDataUser = async (address) => {
+      let userData = await Request.send({
+        method: "POST",
+        path: "/api/users/login",
+        data: {
+          walletAddress: address
+        }
+      })
+      if (userData && userData.msg && userData.msg === "NOT_FOUND") {
+        setUserData(undefined)
+      } else {
+        setUserData({
+          ...userData.user,
+          token: userData.token
+        })
+      }
+    }
+    if (walletData && walletData._address) {
+      getDataUser(walletData._address)
+    }
+  }, [walletData])
+
+
   function handleClick(goTo) {
-    if (goTo !== "BUY TURN" && goTo !== "ABOUT") {
+    if (goTo !== "BUY TURN" && goTo !== "ABOUT" && goTo !== "LOGOUT") {
       let buttonContainer = document.querySelector(".button-container")
       if (buttonContainer) {
         buttonContainer.classList.add("fade-out")
@@ -285,6 +321,40 @@ function Home({ route, setRoute, userData }) {
         setRoute(goTo)
       }, 1000)
     }
+
+    if (goTo === "LOGOUT") {
+      localStorage.clear()
+      setUserData(undefined)
+      setWalletData(undefined)
+      if (isActive) {
+        connector.deactivate();
+      }
+    }
+  }
+
+  async function onConnectMetaMaskWallet() {
+    localStorage.setItem("METAMASK_CONNECT", "");
+    localStorage.setItem("WALLET_CONNECT", "");
+    if (isActive) {
+      connector.deactivate();
+    }
+    if (!isActive) metaMask.activate(chainId);
+  }
+
+  async function onConnectWalletConnect() {
+
+  }
+
+  const onRegisterNewAccount = async (values) => {
+    let userDetail = await Request.send({
+      method: "POST",
+      path: "/api/users/register",
+      data: {
+        ...values,
+        walletAddress: walletData._address
+      }
+    });
+    setUserData(userDetail)
   }
 
   return (
@@ -292,23 +362,69 @@ function Home({ route, setRoute, userData }) {
       <canvas id="game" width={CANVAS_WIDTH} height={CANVAS_HEIGHT} ref={canvasRef}></canvas>
       <div className="button-container">
         <nav>
-          {/* {
-            !userData ? (
+          {
+            (!walletData && !userData) && (
               <>
-                <button id="connectWallet"></button>
+                <button
+                  className="common_button"
+                  id="connectMeteMaskWallet"
+                  onClick={onConnectMetaMaskWallet}
+                ></button>
+                <button
+                  id="connectWalletConnect"
+                  className="common_button"
+                  onClick={onConnectWalletConnect}
+                ></button>
               </>
-            ) : ( */}
-          <>
-            <button onClick={() => handleClick("/play")} />
-            <button onClick={() => handleClick("/leader-board")}></button>
-            <button onClick={() => handleClick("BUY TURN")}></button>
-            <button onClick={() => handleClick("ABOUT")}></button>
-          </>
-          {/* )
-          } */}
+            )
+          }
+          {
+            (walletData && !userData) && (
+              <div className="form">
+                <Form
+                  name="basic"
+                  onFinish={onRegisterNewAccount}
+                  // onFinishFailed={onFinishFailed}
+                  autoComplete="off"
+                >
+                  <Form.Item
+                    label="name"
+                    name="name"
+                    rules={[{ required: true, message: 'Please input your name!' }]}
+                  >
+                    <Input />
+                  </Form.Item>
+
+                  <Form.Item
+                    label="password"
+                    name="password"
+                    rules={[{ required: true, message: 'Please input your password!' }]}
+                  >
+                    <Input.Password />
+                  </Form.Item>
+                  <Form.Item className="center">
+                    <Button type="primary" htmlType="submit">
+                      Submit
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </div>
+            )
+          }
+          {
+            (walletData && userData) && (
+              <>
+                <button className="common_button" onClick={() => handleClick("/play")} />
+                <button className="common_button" onClick={() => handleClick("/leader-board")}></button>
+                <button className="common_button" onClick={() => handleClick("BUY TURN")}></button>
+                <button className="common_button" onClick={() => handleClick("ABOUT")}></button>
+                <button className="common_button" onClick={() => handleClick("LOGOUT")}></button>
+              </>
+            )
+          }
         </nav>
       </div>
-    </container>
+    </container >
   );
 }
 

@@ -1,19 +1,37 @@
-.button-container nav button#connectWallet::before {
+.button-container nav .common_button#connectMeteMaskWallet::before {
   content: 'CONNECT WALLET';
 }
 
-.button-container nav button:nth-child(1):not(#connectWallet)::before {
+.button-container nav .common_button#connectWalletConnect::before {
+  content: 'WALLET CONNECT';
+}
+
+.button-container nav .common_button:nth-child(1)::before {
   content: 'PLAY';
 }
 
-.button-container nav button:nth-child(2):not(#connectWallet)::before {
+.button-container nav .common_button:nth-child(2)::before {
   content: 'LEADER BOARD';
 }
 
-.button-container nav button:nth-child(3):not(#connectWallet)::before {
+.button-container nav .common_button:nth-child(3)::before {
   content: 'BUY TURN';
 }
 
-.button-container nav button:nth-child(4):not(#connectWallet)::before {
+.button-container nav .common_button:nth-child(4)::before {
   content: 'ABOUT';
+}
+
+.button-container nav .common_button:nth-child(5)::before {
+  content: 'LOG OUT';
+}
+
+
+.form {
+  background-color: cornflowerblue;
+}
+
+.form .center {
+  display: flex;
+  justify-content: center;
 }
