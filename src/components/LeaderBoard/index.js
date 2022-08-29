@@ -1,10 +1,10 @@
 import { useRef, useEffect, useState } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../../const';
-import './home.css';
+import './leaderBoard.css';
 
 let gameFrame = 0;
 
-function Home({ route, setRoute, userData }) {
+function LeaderBoard({ route, setRoute }) {
   const canvasRef = useRef()
   const [ctx, setCtx] = useState()
 
@@ -26,19 +26,14 @@ function Home({ route, setRoute, userData }) {
         y: CANVAS_HEIGHT / 2,
         click: false
       }
-
-      function mouseMove(e) {
+      window.addEventListener('mousemove', function (e) {
         mouse.click = true;
         mouse.x = e.x - canvasPosition.left;
         mouse.y = e.y - canvasPosition.top;
-      }
-
-      function mouseUp() {
+      });
+      window.addEventListener('mouseup', function (e) {
         mouse.click = false;
-      }
-
-      window.addEventListener('mousemove', mouseMove, true);
-      window.addEventListener('mouseup', mouseUp, true);
+      });
 
       // Player
       const playerLeft = new Image();
@@ -247,22 +242,13 @@ function Home({ route, setRoute, userData }) {
         handleBackGround();
         player.update();
         player.draw();
-        ctx.fillStyle = 'rgba(34,147,214,1)';
-        ctx.font = '20px Georgia';
-        ctx.fillText('YOUR TURN: ', 10, 120);
         gameFrame += 1;
         gameFrame = gameFrame >= 100 ? 0 : gameFrame
-        if (route === '/') {
+        if (route === '/leader-board') {
           requestAnimationFrame(animate);
         }
       }
       animate();
-
-      // window.addEventListener('resize', function () {
-      //   canvasPosition = canvasRef.current.getBoundingClientRect();
-      //   mouse.x = CANVAS_WIDTH / 2;
-      //   mouse.y = CANVAS_HEIGHT / 2;
-      // });
     }
 
     return () => {
@@ -272,44 +258,54 @@ function Home({ route, setRoute, userData }) {
     }
   }, [ctx])
 
-  function handleClick(goTo) {
-    if (goTo !== "BUY TURN" && goTo !== "ABOUT") {
-      let buttonContainer = document.querySelector(".button-container")
-      if (buttonContainer) {
-        buttonContainer.classList.add("fade-out")
-        setTimeout(() => {
-          buttonContainer.classList.add("d-none")
-        }, 1000)
-      }
-      setTimeout(() => {
-        setRoute(goTo)
-      }, 1000)
-    }
-  }
-
   return (
     <container>
       <canvas id="game" width={CANVAS_WIDTH} height={CANVAS_HEIGHT} ref={canvasRef}></canvas>
-      <div className="button-container">
+      <div className="leader-board-container">
         <nav>
-          {/* {
-            !userData ? (
-              <>
-                <button id="connectWallet"></button>
-              </>
-            ) : ( */}
-          <>
-            <button onClick={() => handleClick("/play")} />
-            <button onClick={() => handleClick("/leader-board")}></button>
-            <button onClick={() => handleClick("BUY TURN")}></button>
-            <button onClick={() => handleClick("ABOUT")}></button>
-          </>
-          {/* )
-          } */}
+          <div className="leaderboard">
+            <h1>
+              MOST ACTIVE PLAYER
+            </h1>
+            <ol>
+              <li>
+                <mark>Jerry Wood</mark>
+                <small>315</small>
+              </li>
+              <li>
+                <mark>Brandon Barnes</mark>
+                <small>301</small>
+              </li>
+              <li>
+                <mark>Raymond Knight</mark>
+                <small>292</small>
+              </li>
+              <li>
+                <mark>Trevor McCormick</mark>
+                <small>245</small>
+              </li>
+              <li>
+                <mark>Andrew Fox</mark>
+                <small>203</small>
+              </li>
+            </ol>
+          </div>
+          <button onClick={() => {
+            let buttonContainer = document.querySelector(".leader-board-container")
+            if (buttonContainer) {
+              buttonContainer.classList.add("fade-out")
+              setTimeout(() => {
+                buttonContainer.classList.add("d-none")
+              }, 1000)
+            }
+            setTimeout(() => {
+              setRoute('/')
+            }, 1000)
+          }}></button>
         </nav>
       </div>
     </container>
   );
 }
 
-export default Home;
+export default LeaderBoard;

@@ -72,18 +72,6 @@ button::before {
   background: url('../public/img/button.png') center no-repeat;
   background-size: cover;
 }
-button:nth-child(1)::before {
-  content: 'PLAY';
-}
-button:nth-child(2)::before {
-  content: 'TOP RANK';
-}
-button:nth-child(3)::before {
-  content: 'BUY TURN';
-}
-button:nth-child(4)::before {
-  content: 'ABOUT';
-}
 
 button:hover::before {
   /* transform: translateX(-50px); */
@@ -98,6 +86,10 @@ button:hover::before {
 
 .d-none {
   display: none;
+}
+
+.d-block {
+  display: block;
 }
 
 @keyframes fade-out {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Home from './components/Home'
 import Play from './components/Play'
-import TopRank from './components/TopRank'
+import LeaderBoard from './components/LeaderBoard'
 
 const LIST_ROUTE = [
   {
@@ -9,8 +9,8 @@ const LIST_ROUTE = [
     render: Home
   },
   {
-    path: "/top-rank",
-    render: TopRank
+    path: "/leader-board",
+    render: LeaderBoard
   },
   {
     path: "/play",
@@ -20,11 +20,12 @@ const LIST_ROUTE = [
 
 function App() {
   const [route, setRoute] = useState("/")
+  const [userData, setUserData] = useState()
   let Component = LIST_ROUTE.find((item) => item.path === route)
 
   return (
     <>
-      {<Component.render setRoute={setRoute} />}
+      {<Component.render route={route} setRoute={setRoute} userData={userData} setUserData={setUserData} />}
     </>
   );
 }
