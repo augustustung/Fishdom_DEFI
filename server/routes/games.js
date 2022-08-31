@@ -26,7 +26,7 @@ router.get("/leader-board", auth, async (req, res) => {
     },
     {
       $sort: {
-        _id: -1
+        score: -1
       }
     },
     {
@@ -75,8 +75,20 @@ router.post("/buy-turn", auth, async (req, res) => {
   const user = await UserModel.findById(req.user._id);
   console.log('found user', user);
   console.log('remain user turn', user.playTurn);
-  await UserModel.updateOne({ id: req.user._id }, { playTurn: user.playTurn + req.body.turn });
+  console.log(user.playTurn + req.body.turn)
 
+  await user.update({ playTurn: user.playTurn + req.body.turn });
+  await user.save();
+  res.status(200).json({ msg: 'ok' })
+});
+
+router.post('/play', auth, async (req, res) => {
+  const user = await UserModel.findById(req.user._id);
+  console.log('found user', user);
+  console.log('remain user turn', user.playTurn);
+
+  await user.update({ playTurn: user.playTurn - 1 });
+  await user.save();
   res.status(200).json({ msg: 'ok' })
 });
 

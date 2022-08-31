@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../../const';
 import './play.css';
-
+import Request from '../../Axios';
+import { toast } from "react-toastify";
 let score = 0;
 let gameFrame = 0;
 
@@ -518,7 +519,19 @@ function Play({ route }) {
       <div
         className="gameOver"
         onClick={() => {
-          window.location.reload()
+          Request.send({
+            method: "POST",
+            path: '/api/games/save-score',
+            data: {
+              score: score
+            }
+          }).then(res => {
+            if (res) {
+              window.location.reload()
+            } else {
+              toast.error("Error from server")
+            }
+          })
         }}
       />
     </container>

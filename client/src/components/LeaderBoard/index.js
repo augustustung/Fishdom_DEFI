@@ -1,14 +1,16 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, memo } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../../const';
 import './leaderBoard.css';
-
+import Request from '../../Axios';
 let gameFrame = 0;
 
 function LeaderBoard({ route, setRoute }) {
   const canvasRef = useRef()
   const [ctx, setCtx] = useState()
+  const [dataLeaderBoard, setDataLeaderBoard] = useState([])
 
   useEffect(() => {
+    let requestAnimationFrameId
     if (canvasRef && canvasRef.current) {
       const currentCtx = canvasRef.current.getContext('2d')
       if (currentCtx) {
@@ -245,7 +247,7 @@ function LeaderBoard({ route, setRoute }) {
         gameFrame += 1;
         gameFrame = gameFrame >= 100 ? 0 : gameFrame
         if (route === '/leader-board') {
-          requestAnimationFrame(animate);
+          requestAnimationFrameId = requestAnimationFrame(animate);
         }
       }
       animate();
@@ -255,8 +257,29 @@ function LeaderBoard({ route, setRoute }) {
       setCtx(undefined)
       window.removeEventListener('mousemove', null, true);
       window.removeEventListener('mouseup', null, true);
+      cancelAnimationFrame(requestAnimationFrameId)
     }
   }, [ctx])
+
+  useEffect(() => {
+    let isMounted = false;
+    async function init() {
+      let resDataLeaderBoard = await Request.send({
+        method: "GET",
+        path: "/api/games/leader-board"
+      });
+
+      if (resDataLeaderBoard && resDataLeaderBoard.length > 0 && !isMounted) {
+        setDataLeaderBoard(resDataLeaderBoard)
+      } else {
+        setDataLeaderBoard([])
+      }
+    }
+    init()
+    return () => {
+      isMounted = true;
+    }
+  }, [])
 
   return (
     <container>
@@ -268,44 +291,37 @@ function LeaderBoard({ route, setRoute }) {
               MOST ACTIVE PLAYER
             </h1>
             <ol>
-              <li>
-                <mark>Jerry Wood</mark>
-                <small>315</small>
-              </li>
-              <li>
-                <mark>Brandon Barnes</mark>
-                <small>301</small>
-              </li>
-              <li>
-                <mark>Raymond Knight</mark>
-                <small>292</small>
-              </li>
-              <li>
-                <mark>Trevor McCormick</mark>
-                <small>245</small>
-              </li>
-              <li>
-                <mark>Andrew Fox</mark>
-                <small>203</small>
-              </li>
+              {
+                dataLeaderBoard.map(item => {
+                  return (
+                    <li key={item.userWallet}>
+                      <mark>{item?.userName || ""}</mark>
+                      <small>{item?.score || "0"}</small>
+                    </li>
+                  )
+                })
+              }
             </ol>
           </div>
-          <button onClick={() => {
-            let buttonContainer = document.querySelector(".leader-board-container")
-            if (buttonContainer) {
-              buttonContainer.classList.add("fade-out")
+          <button
+            onClick={() => {
+              let buttonContainer = document.querySelector(".leader-board-container")
+              if (buttonContainer) {
+                buttonContainer.classList.add("fade-out")
+                setTimeout(() => {
+                  buttonContainer.classList.add("d-none")
+                }, 1000)
+              }
               setTimeout(() => {
-                buttonContainer.classList.add("d-none")
+                setRoute('/')
               }, 1000)
-            }
-            setTimeout(() => {
-              setRoute('/')
-            }, 1000)
-          }}></button>
+            }}
+            className='common_button'
+          ></button>
         </nav>
       </div>
     </container>
   );
 }
 
-export default LeaderBoard;
+export default memo(LeaderBoard);

@@ -6,6 +6,7 @@ import { chainId } from '../../constant/chain'
 import { useWeb3React } from "@web3-react/core";
 import Request from '../../Axios'
 import { Button, Form, Input } from 'antd';
+import { toast } from "react-toastify";
 
 const {
   useIsActive,
@@ -20,6 +21,7 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
   const isActive = useIsActive();
 
   useEffect(() => {
+    let requestAnimationFrameId
     if (canvasRef && canvasRef.current) {
       const currentCtx = canvasRef.current.getContext('2d')
       if (currentCtx) {
@@ -264,7 +266,7 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
         gameFrame += 1;
         gameFrame = gameFrame >= 100 ? 0 : gameFrame
         if (route === '/') {
-          requestAnimationFrame(animate);
+          requestAnimationFrameId = requestAnimationFrame(animate);
         }
       }
       animate();
@@ -280,8 +282,9 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
       setCtx(undefined)
       window.removeEventListener('mousemove', null, true);
       window.removeEventListener('mouseup', null, true);
+      cancelAnimationFrame(requestAnimationFrameId)
     }
-  }, [ctx])
+  }, [ctx, userData])
 
 
   useEffect(() => {
@@ -296,49 +299,111 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
       if (userData && userData.msg && userData.msg === "NOT_FOUND") {
         setUserData(undefined)
       } else {
-        setUserData({
+        let formatCleanData = {
           ...userData.user,
           token: userData.token
-        })
+        }
+        localStorage.setItem('user-data', JSON.stringify(formatCleanData))
+        setUserData(formatCleanData)
       }
     }
+
     if (walletData && walletData._address) {
       getDataUser(walletData._address)
     }
   }, [walletData])
 
+  async function handleBuyTurn() {
+    const turn = window.prompt("How many turns?");
+    if (parseInt(turn) === NaN) {
+      return;
+    }
+    Request.send({
+      method: "POST",
+      path: "/api/games/buy-turn",
+      data: {
+        turn: parseInt(turn)
+      }
+    }).then((res) => {
+      if (res && res.msg && res.msg === 'ok') {
+        toast.success('Buy turn success')
+        setUserData(prev => {
+          let formatData = {
+            ...prev,
+            playTurn: prev.playTurn + parseInt(turn)
+          }
+          localStorage.setItem('user-data', JSON.stringify(formatData))
+          return formatData
+        })
+      } else {
+        toast.error("Buy error");
+      }
+    })
+  }
+
+  async function handleDecreasingTurn(path) {
+    Request.send({
+      method: "POST",
+      path: "/api/games/play"
+    }).then((res) => {
+      if (res && res.msg && res.msg === 'ok') {
+        setUserData(prev => {
+          let formatData = {
+            ...prev,
+            playTurn: prev.playTurn - 1
+          }
+          localStorage.setItem('user-data', JSON.stringify(formatData))
+          return formatData
+        })
+        setRoute(path)
+      } else {
+        toast.error("error from server");
+      }
+    })
+  }
 
   function handleClick(goTo) {
-    if (goTo !== "BUY TURN" && goTo !== "ABOUT" && goTo !== "LOGOUT") {
-      let buttonContainer = document.querySelector(".button-container")
-      if (buttonContainer) {
-        buttonContainer.classList.add("fade-out")
+    switch (goTo) {
+      case "LOGOUT": {
+        localStorage.clear()
+        setUserData(undefined)
+        setWalletData(undefined)
+        if (isActive) {
+          connector.deactivate();
+        }
+        break
+      }
+      case "BUY TURN": {
+        handleBuyTurn()
+        break;
+      }
+      case '/play': {
+        handleDecreasingTurn('/play');
+        break;
+      }
+      case 'ABOUT': {
+        window.open("https://www.facebook.com/huytung.novers", "_blank");
+        break;
+      }
+      default:
+        let buttonContainer = document.querySelector(".button-container")
+        if (buttonContainer) {
+          buttonContainer.classList.add("fade-out")
+          setTimeout(() => {
+            buttonContainer.classList.add("d-none")
+          }, 1000)
+        }
         setTimeout(() => {
-          buttonContainer.classList.add("d-none")
+          setRoute(goTo)
         }, 1000)
-      }
-      setTimeout(() => {
-        setRoute(goTo)
-      }, 1000)
-    }
-
-    if (goTo === "LOGOUT") {
-      localStorage.clear()
-      setUserData(undefined)
-      setWalletData(undefined)
-      if (isActive) {
-        connector.deactivate();
-      }
+        break
     }
   }
 
   async function onConnectMetaMaskWallet() {
     localStorage.setItem("METAMASK_CONNECT", "");
     localStorage.setItem("WALLET_CONNECT", "");
-    if (isActive) {
-      connector.deactivate();
-    }
-    if (!isActive) metaMask.activate(chainId);
+    metaMask.activate(chainId);
   }
 
   async function onConnectWalletConnect() {
