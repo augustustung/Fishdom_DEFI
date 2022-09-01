@@ -4,7 +4,7 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./token/IFishdomToken.sol";
 
-contract Staking {
+contract FishdomStaking {
     uint256 constant unitToSecond = 60 * 60;
     uint256 public totalStaked;
 

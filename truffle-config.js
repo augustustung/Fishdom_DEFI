@@ -27,7 +27,7 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           mnemonic,
-          `https://speedy-nodes-nyc.moralis.io/92bbe26df86700c9ae96e4c1/bsc/testnet`
+          `https://data-seed-prebsc-1-s1.binance.org:8545`
         ),
       network_id: 97,
       confirmations: 10,
