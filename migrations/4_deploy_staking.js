@@ -1,8 +1,8 @@
-const FishdomMarket = artifacts.require("FishdomMarket");
+const FishdomStaking = artifacts.require("FishdomStaking");
 const FishdomToken = artifacts.require("FishdomToken");
 
 module.exports = async function (deployer) {
   const IFishdomToken = await FishdomToken.deployed();
-
-  deployer.deploy(FishdomMarket, IFishdomToken.address);
+  await deployer.deploy(FishdomStaking, IFishdomToken.address);
+  await FishdomStaking.deployed()
 };

@@ -5,6 +5,6 @@ const FishdomNFT = artifacts.require("FishdomNFT");
 module.exports = async function (deployer) {
   const IFishdomToken = await FishdomToken.deployed();
   const IFishdomNFT = await FishdomNFT.deployed();
-
-  deployer.deploy(FishdomMarket, IFishdomToken.address, IFishdomNFT.address);
+  console.log(IFishdomToken.address)
+  await deployer.deploy(FishdomMarket, IFishdomToken.address, IFishdomNFT.address);
 };
