@@ -303,7 +303,6 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
           ...userData.user,
           token: userData.token
         }
-        localStorage.setItem('user-data', JSON.stringify(formatCleanData))
         setUserData(formatCleanData)
       }
     }
@@ -327,13 +326,8 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
     }).then((res) => {
       if (res && res.msg && res.msg === 'ok') {
         toast.success('Buy turn success')
-        setUserData(prev => {
-          let formatData = {
-            ...prev,
-            playTurn: prev.playTurn + parseInt(turn)
-          }
-          localStorage.setItem('user-data', JSON.stringify(formatData))
-          return formatData
+        setUserData({
+          playTurn: userData.playTurn + parseInt(turn)
         })
       } else {
         toast.error("Buy error");
@@ -347,13 +341,8 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
       path: "/api/games/play"
     }).then((res) => {
       if (res && res.msg && res.msg === 'ok') {
-        setUserData(prev => {
-          let formatData = {
-            ...prev,
-            playTurn: prev.playTurn - 1
-          }
-          localStorage.setItem('user-data', JSON.stringify(formatData))
-          return formatData
+        setUserData({
+          playTurn: userData.playTurn - 1
         })
         setRoute(path)
       } else {

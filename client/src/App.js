@@ -10,6 +10,8 @@ import {
   hooks as walletConnectHooks
 } from "./connectors/walletConnect";
 import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
+import { ethers } from 'ethers'
+import FishTokenInstance from './contracts/FishdomToken.json'
 
 const {
   useChainId: useChainIdW,
@@ -52,17 +54,32 @@ function App() {
   const chainId = useChainId();
   const chainIdW = useChainIdW();
 
+  function setGlobalUserData(data) {
+    if (!data) {
+      setUserData(undefined)
+      localStorage.removeItem('user-data')
+    } else {
+      setUserData(prev => {
+        let formatData = {
+          ...prev,
+          ...data
+        }
+        localStorage.setItem('user-data', JSON.stringify(formatData))
+        return formatData
+      })
+    }
+  }
 
   useEffect(() => {
-    if (chainId && chainId != 42) {
+    if (chainId && chainId != 97) {
       setIsWrongNetWork(true);
       localStorage.setItem("METAMASK_CONNECT", "");
       localStorage.setItem("WALLET_CONNECT", "");
 
       setWalletData(null);
-      connector.deactivate();
+      // connector.deactivate();
       toast.error("Wrong network");
-    } else if (chainId == 42) {
+    } else if (chainId == 97) {
       setIsWrongNetWork(false);
     }
   }, [chainId, chainIdW]);
@@ -83,12 +100,37 @@ function App() {
     }
   }, [error, errorW]);
 
+  useEffect(() => {
+    async function init() {
+      const provider = new ethers.providers.JsonRpcProvider("https://data-seed-prebsc-1-s1.binance.org:8545")
+      const signer = new ethers.Wallet(
+        process.env.REACT_APP_PVK,
+        provider
+      );
+      const smartcontract = new ethers.Contract(
+        FishTokenInstance.networks[chainId].address,
+        FishTokenInstance.abi, signer
+      );
+      console.log(walletData._address);
+      let balanceOf = await smartcontract.balanceOf(walletData._address)
+        .catch(err => {
+          console.log(JSON.stringify(err))
+        })
+      setGlobalUserData({
+        balanceOf: ethers.utils.formatEther(balanceOf)
+      })
+    }
+    if (walletData) {
+      init()
+    }
+  }, [walletData])
+
   /// get signer
   useEffect(() => {
     const getSigner = async () => {
       try {
         if (provider || providerW) {
-          if (provider && chainId === 42) {
+          if (provider && chainId === 97) {
             // console.log("Provider", provider);
             if (provider) {
               await provider
@@ -113,7 +155,7 @@ function App() {
             return;
           }
 
-          if (providerW && chainIdW === 42) {
+          if (providerW && chainIdW === 97) {
             await providerW.send("eth_requestAccounts", []);
             if (providerW) {
               const signer = providerW.getSigner();
@@ -136,10 +178,17 @@ function App() {
 
   return (
     <>
-      <div>{'Address: ' + walletData?._address || ""}</div>
+      <div style={{ display: 'flex', justifyContent: "space-between" }}>
+        <span>
+          {`Address:  ${walletData?._address ? walletData?._address : ""}`}
+        </span>
+        <span>
+          {`Fishdom Token:  ${userData?.balanceOf ? userData?.balanceOf : "0"}`}
+        </span>
+      </div>
       <Component.render
         route={route} setRoute={setRoute}
-        userData={userData} setUserData={setUserData}
+        userData={userData} setUserData={setGlobalUserData}
         walletData={walletData} setWalletData={setWalletData}
       />
       <ToastContainer />
