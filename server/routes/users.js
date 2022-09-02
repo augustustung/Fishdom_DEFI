@@ -3,6 +3,7 @@ const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require("../middlewares/auth");
+const manager = require('../Deposit/manager');
 
 router.post('/register', async (req, res) => {
   //validation
@@ -50,6 +51,10 @@ router.post('/login', async (req, res) => {
     });
   }
 });
+
+router.post("/deposit", auth, manager.requestDepositFishdomToken);
+
+router.post("/withdraw", auth, manager.requestWithdraw);
 
 router.get("/:id", auth, async (req, res) => {
   console.log("request came for id ", req.user._id)

@@ -2,6 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path');
 // const server = require('http').createServer(app)
 // const io = require('socket.io')(server)
 const connectDb = require('./config/connectDb');
@@ -17,6 +18,7 @@ const gamesRouter = require("./routes/games");
 const usersRouter = require("./routes/users");
 app.use("/api/games", gamesRouter);
 app.use("/api/users", usersRouter);
+app.use(express.static(path.join(__dirname, "./metadata")));
 
 
 app.listen(port, () => {

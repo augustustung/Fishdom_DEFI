@@ -3,6 +3,7 @@ const auth = require("../middlewares/auth");
 const ScoreModel = require('../models/gameModel');
 const UserModel = require('../models/userModel');
 const moment = require('moment');
+const path = require('path');
 
 router.get("/leader-board", auth, async (req, res) => {
   const leaderBoardData = await ScoreModel.aggregate([
@@ -103,5 +104,15 @@ router.post("/save-score", auth, async (req, res) => {
   console.log('save score', data)
   return res.status(200).json(data);
 });
+
+router.get("/metadata/:id.json", async (req, res) => {
+  let id = req.params.id;
+  if (id) {
+    id = parseInt(id);
+    let entropy = (id + 100 - 2 + 44 - 5 + 31) % 5;
+    return res.sendFile(path.resolve(__filename, '../../metadata/player/' + entropy + '.png'));
+  }
+  return res.status(500).json({ msg: 'invalid id' });
+})
 
 module.exports = router;
