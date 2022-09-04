@@ -116,6 +116,26 @@ async function handleDepositToken(txHash, userData) {
   })
 }
 
+
+async function handleWithraw(walletAddress, amount) {
+  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_ENDPOINT)
+  const signer = new ethers.Wallet(
+    process.env.BSC_WALLET_PK,
+    provider
+  );
+  const contractInstance = new ethers.Contract(process.env.FISHDOM_TOKEN, FishdomTokenAbi, signer);
+  let parseAmount = ethers.utils.parseEther((amount * 0.9).toString())
+  let tx = await contractInstance.transfer(walletAddress, parseAmount)
+  tx.wait(1)
+    .then(() => {
+      return tx;
+    })
+    .catch(() => {
+      return undefined;
+    });
+}
+
 module.exports = {
-  handleDepositToken
+  handleDepositToken,
+  handleWithraw
 }

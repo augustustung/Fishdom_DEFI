@@ -74,13 +74,16 @@ router.post("/buy-turn", auth, async (req, res) => {
     return res.status(500).json({ msg: "Invalid number of turns " });
   }
   const user = await UserModel.findById(req.user._id);
-  console.log('found user', user);
-  console.log('remain user turn', user.playTurn);
-  console.log(user.playTurn + req.body.turn)
-
-  await user.update({ playTurn: user.playTurn + req.body.turn });
-  await user.save();
-  res.status(200).json({ msg: 'ok' })
+  if (userData.balance >= 1000 * req.body.turn) {
+    await user.update({
+      playTurn: user.playTurn + req.body.turn,
+      balance: userData.balance - 1000 * req.body.turn
+    });
+    await user.save();
+    res.status(200).json({ msg: 'ok' });
+  } else {
+    res.status(500).json({ msg: 'over allowance' });
+  }
 });
 
 router.post('/play', auth, async (req, res) => {

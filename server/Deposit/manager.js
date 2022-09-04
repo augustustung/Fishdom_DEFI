@@ -12,7 +12,7 @@ async function requestDepositFishdomToken(req, res) {
     })
     await userData.save();
     return res.status(200).json({
-      balance: userData.balance + balance
+      balance: userData.balance
     })
   }
   return res.status(500).json({ msg: "failed" })
@@ -30,7 +30,8 @@ async function requestWithdraw(req, res) {
       });
       await userData.save();
       return res.status(200).json({
-        balance: userData.balance - amount
+        tx: withdrawRes,
+        balance: userData.balance
       })
     }
   }
