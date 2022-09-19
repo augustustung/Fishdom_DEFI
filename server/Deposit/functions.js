@@ -2,27 +2,7 @@
 const { ethers } = require('ethers');
 require('dotenv').config();
 const FishdomTokenAbi = require('../const/fishdomTokenAbi');
-
-
-function _parseBigNumberToNumber(value, decimals) {
-  if (!value) return 0;
-  let formatWei = value.toString();
-  let length = formatWei.length;
-  let fixedValue = '';
-  let stack = 0;
-  for (let i = length - 1; i >= 0; i--) {
-    stack++;
-    if (formatWei[i] !== '0') {
-      fixedValue = `${formatWei[i]}${fixedValue}` // nếu kí tự != 0 thì lưu lại 
-    }
-    formatWei = formatWei.slice(0, -1); // xoá ký tự cuối
-    if (stack === decimals) {
-      break;
-    }
-  }
-  formatWei = `${formatWei}${fixedValue ? "." + fixedValue : ""}`;
-  return parseFloat(formatWei);
-}
+const UtilFunctions = require('../utils');
 
 async function _getDecimalEther(signer, abi) {
   return new Promise(async (resolve) => {
@@ -50,19 +30,19 @@ function _handleGetReceiver(signature) {
   return '0x' + receiver;
 }
 
-async function _decodeAndGetBalance(provider, txHash) {
+async function _decodeAndGetBalance(provider, txHash, userData) {
   return new Promise(async (resolve) => {
     try {
-      // get tx unconfirm
-      let txUncofirmed = await provider.getTransaction(txHash).catch(() => undefined);
-      if (!txUncofirmed) {
-        resolve(undefined);
-        return;
-      }
+      let {
+        amount,
+        txUncofirmed,
+        txConfirmed
+      } = await UtilFunctions.decodeTxData(provider, txHash, ['uint256']);
+      amount = amount[0].toString();
       /* check if 
-       * - data contains "0xa9059cbb" (signature of function transfer) 
-       * - chainId is correct
-       * - "to" === usdt address
+        * - data contains "0xa9059cbb" (signature of function transfer) 
+        * - chainId is correct
+        * - "to" === usdt address
       */
       if (!(
         txUncofirmed.data.includes('0xa9059cbb') &&
@@ -72,19 +52,9 @@ async function _decodeAndGetBalance(provider, txHash) {
         resolve(undefined);
         return;
       }
-      // check if tx confirmed
-      let txConfirmed = await txUncofirmed.wait(1).catch(() => undefined);
-      if (!txConfirmed) {
-        console.info("tx hasn't confirmed yet");
-        resolve(undefined);
-        return;
-      }
-
       let receiver = _handleGetReceiver(txConfirmed.logs[0].topics[2]);
       // check if receiver === merchant address 
       if (receiver === process.env.BSC_WALLET_ADDRESS) {
-        let amount = ethers.utils.defaultAbiCoder.decode(['uint256'], txConfirmed.logs[0].data)
-        amount = amount[0].toString();
         resolve(amount);
       } else {
         resolve(undefined);
@@ -107,7 +77,7 @@ async function handleDepositToken(txHash, userData) {
       );
       let balanceOfTx = await _decodeAndGetBalance(provider, txHash, userData);
       const decimal = await _getDecimalEther(signer, FishdomTokenAbi);
-      balanceOfTx = _parseBigNumberToNumber(balanceOfTx, decimal);
+      balanceOfTx = ethers.utils.formatUnits(balanceOfTx, decimal);
       resolve(balanceOfTx);
     } catch (error) {
       console.error(__filename, error);
