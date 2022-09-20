@@ -176,15 +176,36 @@ function App() {
     getSigner();
   }, [provider, providerW, chainId, chainIdW]);
 
+  async function handleDepositIntoGame() {
+    let amount = window.prompt()
+    if (!amount) {
+      return;
+    }
+
+    let contractInstance = new ethers.Contract(
+      FishTokenInstance.networks[chainId].address,
+      FishTokenInstance.abi,
+      walletData
+    )
+
+    await contractInstance.transfer(
+      process.env.REACT_APP_HOST_WALLET,
+      ethers.utils.parseEther(amount)
+    )
+  }
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: "space-between" }}>
-        <span>
+        <div>
           {`Address:  ${walletData?._address ? walletData?._address : ""}`}
-        </span>
-        <span>
-          {`Fishdom Token:  ${userData?.balanceOf ? userData?.balanceOf : "0"}`}
-        </span>
+        </div>
+        <div>
+          <span>
+            {`FdT Balance:  ${userData?.balanceOf ? userData?.balanceOf : "0"}`}
+          </span>
+          <button onClick={handleDepositIntoGame}>Deposit into game</button>
+        </div>
       </div>
       <Component.render
         route={route} setRoute={setRoute}

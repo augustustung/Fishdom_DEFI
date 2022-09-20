@@ -1,26 +1,8 @@
 'use strict';
 const { ethers } = require('ethers');
 require('dotenv').config();
-const FishdomTokenAbi = require('../const/fishdomTokenAbi');
+const FishdomTokenAbi = require('../contracts/FishdomToken.json').abi;
 const UtilFunctions = require('../utils');
-
-async function _getDecimalEther(signer, abi) {
-  return new Promise(async (resolve) => {
-    try {
-      const contractInstance = new ethers.Contract(process.env.FISHDOM_TOKEN, abi, signer)
-      let decimal = await contractInstance.decimals();
-      if (decimal) {
-        decimal = parseInt(decimal.toString());
-        resolve(decimal);
-      } else {
-        resolve(undefined);
-      }
-    } catch (error) {
-      console.error("get decimal error");
-      resolve(undefined);
-    }
-  })
-}
 
 function _handleGetReceiver(signature) {
   let receiver = signature.replace(/^0x/g, '');
@@ -34,11 +16,11 @@ async function _decodeAndGetBalance(provider, txHash, userData) {
   return new Promise(async (resolve) => {
     try {
       let {
-        amount,
+        dataDecoded: amount,
         txUncofirmed,
         txConfirmed
       } = await UtilFunctions.decodeTxData(provider, txHash, ['uint256']);
-      amount = amount[0].toString();
+      amount = amount[0];
       /* check if 
         * - data contains "0xa9059cbb" (signature of function transfer) 
         * - chainId is correct
@@ -53,8 +35,8 @@ async function _decodeAndGetBalance(provider, txHash, userData) {
         return;
       }
       let receiver = _handleGetReceiver(txConfirmed.logs[0].topics[2]);
-      // check if receiver === merchant address 
-      if (receiver === process.env.BSC_WALLET_ADDRESS) {
+      // check if receiver === merchant address
+      if (receiver === process.env.BSC_WALLET_ADDRESS.toLowerCase()) {
         resolve(amount);
       } else {
         resolve(undefined);
@@ -71,13 +53,8 @@ async function handleDepositToken(txHash, userData) {
   return new Promise(async (resolve, reject) => {
     try {
       const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_ENDPOINT)
-      const signer = new ethers.Wallet(
-        process.env.BSC_WALLET_PK,
-        provider
-      );
       let balanceOfTx = await _decodeAndGetBalance(provider, txHash, userData);
-      const decimal = await _getDecimalEther(signer, FishdomTokenAbi);
-      balanceOfTx = ethers.utils.formatUnits(balanceOfTx, decimal);
+      balanceOfTx = ethers.utils.formatEther(balanceOfTx);
       resolve(balanceOfTx);
     } catch (error) {
       console.error(__filename, error);
@@ -88,21 +65,30 @@ async function handleDepositToken(txHash, userData) {
 
 
 async function handleWithraw(walletAddress, amount) {
-  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_ENDPOINT)
-  const signer = new ethers.Wallet(
-    process.env.BSC_WALLET_PK,
-    provider
-  );
-  const contractInstance = new ethers.Contract(process.env.FISHDOM_TOKEN, FishdomTokenAbi, signer);
-  let parseAmount = ethers.utils.parseEther((amount * 0.9).toString())
-  let tx = await contractInstance.transfer(walletAddress, parseAmount)
-  tx.wait(1)
-    .then(() => {
-      return tx;
-    })
-    .catch(() => {
-      return undefined;
-    });
+  try {
+    const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_ENDPOINT)
+    const signer = new ethers.Wallet(
+      process.env.BSC_WALLET_PK,
+      provider
+    );
+    const contractInstance = new ethers.Contract(process.env.FISHDOM_TOKEN, FishdomTokenAbi, signer);
+    let parseAmount = ethers.utils.parseEther((amount * 0.9).toString())
+    let tx = await contractInstance.transfer(
+      walletAddress,
+      parseAmount
+    )
+    return tx.wait(1)
+      .then(() => {
+        return tx;
+      })
+      .catch((err) => {
+        console.error("transfer Fdt error", err)
+        return undefined;
+      });
+  } catch (error) {
+    console.error(__filename, error);
+    return undefined;
+  }
 }
 
 module.exports = {
