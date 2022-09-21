@@ -88,8 +88,6 @@ router.post("/buy-turn", auth, async (req, res) => {
 
 router.post('/play', auth, async (req, res) => {
   const user = await UserModel.findById(req.user._id);
-  console.log('found user', user);
-  console.log('remain user turn', user.playTurn);
 
   await user.update({ playTurn: user.playTurn - 1 });
   await user.save();

@@ -2,6 +2,9 @@ const jwt = require('jsonwebtoken')
 
 module.exports = (req, res, next) => {
   let token = req.header('authorization')
+  if (!token) {
+    return res.status(401).json({ msg: "No Token - Authorization Denied" })
+  }
   token = token.split(" ")[1];
   if (!token) {
     return res.status(401).json({ msg: "No Token - Authorization Denied" })

@@ -1,6 +1,6 @@
 const { ethers } = require('ethers');
 
-async function decodeTxData(provider, txHash, fields) {
+async function decodeTxData(provider, txHash, topicFields, inputFields = []) {
   return new Promise(async (resolve) => {
     try {
       // get tx unconfirm
@@ -16,12 +16,20 @@ async function decodeTxData(provider, txHash, fields) {
         resolve(undefined);
         return;
       }
-
-      let dataDecoded = ethers.utils.defaultAbiCoder.decode(fields, txConfirmed.logs[0].data)
+      let logsData = txConfirmed.logs;
+      let dataDecoded = ethers.utils.defaultAbiCoder.decode(topicFields, logsData[logsData.length - 1].data)
+      let inputData = []
+      if (inputFields && inputFields.length > 0) {
+        inputData = ethers.utils.defaultAbiCoder.decode(
+          inputFields,
+          ethers.utils.hexDataSlice(txUncofirmed.data, 4)
+        )
+      }
       resolve({
         dataDecoded,
         txUncofirmed,
-        txConfirmed
+        txConfirmed,
+        inputData
       });
     } catch (error) {
       console.error("error get tx: " + txHash);
