@@ -1,7 +1,7 @@
 'use strict';
 const { ethers } = require('ethers');
 require('dotenv').config();
-const FishdomTokenAbi = require('../contracts/FishdomToken.json').abi;
+const FishdomToken = require('../contracts/token/FishdomToken.sol/FishdomToken.json');
 const UtilFunctions = require('../utils');
 
 function _handleGetReceiver(signature) {
@@ -28,7 +28,7 @@ async function _decodeAndGetBalance(provider, txHash, userData) {
       */
       if (!(
         txUncofirmed.data.includes('0xa9059cbb') &&
-        txUncofirmed.to === process.env.FISHDOM_TOKEN &&
+        txUncofirmed.to === FishdomToken.networks[97].address &&
         txUncofirmed.from === userData.walletAddress
       )) {
         resolve(undefined);
@@ -71,7 +71,7 @@ async function handleWithraw(walletAddress, amount) {
       process.env.BSC_WALLET_PK,
       provider
     );
-    const contractInstance = new ethers.Contract(process.env.FISHDOM_TOKEN, FishdomTokenAbi, signer);
+    const contractInstance = new ethers.Contract(FishdomToken.networks[97].address, FishdomToken.abi, signer);
     let parseAmount = ethers.utils.parseEther((amount * 0.9).toString())
     let tx = await contractInstance.transfer(
       walletAddress,

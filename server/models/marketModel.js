@@ -1,21 +1,33 @@
 const mongoose = require('mongoose')
 
 const Market = mongoose.Schema({
+  txHash: {
+    type: String,
+    require: true
+  },
   seller: {
     type: String,
     required: true
   },
-  amount: {
+  price: {
     type: String,
     default: '0'
   },
   tokenId: {
-    type: Number,
+    type: String,
+    default: 0
+  },
+  itemId: {
+    type: String,
     default: 0
   },
   isHidden: {
     type: Number,
-    default: 0 // 1: hide, 0: show
+    default: 0 // 1: hide, 0: show || buy --> hide
+  },
+  isDeleted: {
+    type: Number,
+    default: 0 // 1: deleted, 0: show || withdraw --> delete
   },
   updatedAt: {
     type: Date,

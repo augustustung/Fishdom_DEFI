@@ -1,6 +1,19 @@
 const { ethers } = require('ethers');
 
-async function decodeTxData(provider, txHash, topicFields, inputFields = []) {
+/**
+ * 
+ * @param {*} provider provider of chain
+ * @param {*} txHash transaction hash
+ * @param {*} abiEvent ex: event BuyMarketItem(
+        uint256 indexed itemId,
+        uint256 indexed tokenId,
+        uint256 price,
+        address seller,
+        address buyer
+      )
+ * @returns { eventData, txUncofirmed, txConfirmed }
+ */
+async function decodeTxData(provider, txHash, abiEvent) {
   return new Promise(async (resolve) => {
     try {
       // get tx unconfirm
@@ -16,20 +29,15 @@ async function decodeTxData(provider, txHash, topicFields, inputFields = []) {
         resolve(undefined);
         return;
       }
+
       let logsData = txConfirmed.logs;
-      let dataDecoded = ethers.utils.defaultAbiCoder.decode(topicFields, logsData[logsData.length - 1].data)
-      let inputData = []
-      if (inputFields && inputFields.length > 0) {
-        inputData = ethers.utils.defaultAbiCoder.decode(
-          inputFields,
-          ethers.utils.hexDataSlice(txUncofirmed.data, 4)
-        )
-      }
+      let iface = new ethers.utils.Interface(abiEvent);
+      let log = iface.parseLog(logsData[logsData.length - 1]);
+
       resolve({
-        dataDecoded,
+        eventData: log,
         txUncofirmed,
         txConfirmed,
-        inputData
       });
     } catch (error) {
       console.error("error get tx: " + txHash);

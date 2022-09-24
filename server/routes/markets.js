@@ -4,9 +4,9 @@ const manager = require('../Market/manager');
 
 router.post('/sell', auth, manager.sellItem);
 
-// router.post('/buy', auth, manager.buyItem);
+router.post('/buy', auth, manager.buyItem);
 
-// router.post("/withdraw", auth, manager.requestWithdraw);
+router.post("/withdraw", auth, manager.withdraw);
 
 router.post("/get", auth, manager.getList);
 

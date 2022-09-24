@@ -2,8 +2,11 @@ const router = require("express").Router();
 const auth = require("../middlewares/auth");
 const ScoreModel = require('../models/gameModel');
 const UserModel = require('../models/userModel');
+const NFTModel = require('../models/nft');
 const moment = require('moment');
 const path = require('path');
+const { ethers } = require('ethers');
+const FishdomNFT = require('../contracts/FishdomNFT.sol/FishdomNFT.json');
 
 router.get("/leader-board", auth, async (req, res) => {
   const leaderBoardData = await ScoreModel.aggregate([
@@ -106,6 +109,31 @@ router.post("/save-score", auth, async (req, res) => {
   return res.status(200).json(data);
 });
 
+router.post("/mint", auth, async (req, res) => {
+  let tokenId = req.payload.tokenId;
+  let userId = req.user._id;
+  let userData = await UserModel.findById(userId);
+  if (!userData) {
+    return res.status(500).json({ msg: 'failed' });
+  }
+
+  const contractInstance = new ethers.Contract(
+    FishdomNFT.networks[97].address,
+    FishdomNFT.abi
+  );
+  let ownerOf = await contractInstance.ownerOf(tokenId);
+  if (ownerOf !== userData.walletAddress) {
+    return res.status(500).json({ msg: 'failed' });
+  }
+
+  await NFTModel.create({
+    walletAddress: userData.walletAddress,
+    tokenId: tokenId.toString()
+  })
+
+  return res.status(200).json({ msg: 'success' });
+});
+
 router.get("/metadata/:id.json", async (req, res) => {
   let id = req.params.id;
   if (id) {
@@ -114,6 +142,6 @@ router.get("/metadata/:id.json", async (req, res) => {
     return res.sendFile(path.resolve(__filename, '../../metadata/player/' + entropy + '.png'));
   }
   return res.status(500).json({ msg: 'invalid id' });
-})
+});
 
 module.exports = router;
