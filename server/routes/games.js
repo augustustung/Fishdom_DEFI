@@ -7,6 +7,7 @@ const moment = require('moment');
 const path = require('path');
 const { ethers } = require('ethers');
 const FishdomNFT = require('../contracts/FishdomNFT.sol/FishdomNFT.json');
+require('dotenv').config();
 
 router.get("/leader-board", auth, async (req, res) => {
   const leaderBoardData = await ScoreModel.aggregate([
@@ -110,25 +111,36 @@ router.post("/save-score", auth, async (req, res) => {
 });
 
 router.post("/mint", auth, async (req, res) => {
-  let tokenId = req.payload.tokenId;
+  let nftId = req.body.nftId;
+  let existingNFT = await NFTModel.findOne({
+    nftId: nftId
+  });
+
+  if (existingNFT) {
+    return res.status(500).json({ msg: "existing nft" });
+  }
   let userId = req.user._id;
+
   let userData = await UserModel.findById(userId);
   if (!userData) {
     return res.status(500).json({ msg: 'failed' });
   }
 
+  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_ENDPOINT)
   const contractInstance = new ethers.Contract(
     FishdomNFT.networks[97].address,
-    FishdomNFT.abi
+    FishdomNFT.abi,
+    provider
   );
-  let ownerOf = await contractInstance.ownerOf(tokenId);
+
+  let ownerOf = await contractInstance.ownerOf(nftId);
   if (ownerOf !== userData.walletAddress) {
     return res.status(500).json({ msg: 'failed' });
   }
 
   await NFTModel.create({
     walletAddress: userData.walletAddress,
-    tokenId: tokenId.toString()
+    nftId: nftId.toString()
   })
 
   return res.status(200).json({ msg: 'success' });
