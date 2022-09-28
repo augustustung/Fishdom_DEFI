@@ -92,7 +92,9 @@ router.post("/buy-turn", auth, async (req, res) => {
 
 router.post('/play', auth, async (req, res) => {
   const user = await UserModel.findById(req.user._id);
-
+  if (user.playTurn === 0) {
+    res.status(200).json({ msg: 'not have enough turn' });
+  }
   await user.update({ playTurn: user.playTurn - 1 });
   await user.save();
   res.status(200).json({ msg: 'ok' })
@@ -171,10 +173,12 @@ router.post("/getListNFT", auth, async (req, res) => {
 
 router.get("/metadata/:id.json", async (req, res) => {
   let id = req.params.id;
+  /* ex: 1-left.json 1-right.json */
   if (id) {
-    id = parseInt(id);
-    let entropy = (id + 100 - 2 + 44 - 5 + 31) % 5;
-    return res.sendFile(path.resolve(__filename, '../../metadata/player/' + entropy + '.png'));
+    id = id.split('-')
+    let parseId = parseInt(id[0]);
+    let entropy = (parseId + 100 - 2 + 44 - 5 + 31) % 5;
+    return res.sendFile(path.resolve(__filename, '../../metadata/player/' + entropy + id[1] + '.png'));
   }
   return res.status(500).json({ msg: 'invalid id' });
 });
