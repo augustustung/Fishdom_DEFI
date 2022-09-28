@@ -1,28 +1,76 @@
-import { useEffect, useState, memo } from "react";
+import { useEffect, useState, memo, useCallback } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../../const';
 import './inventory.css';
 import Request from '../../Axios';
+import { toast } from 'react-toastify'
 
 function Inventory({ setRoute, userData }) {
   const [listNFT, setListNFT] = useState({ data: [], total: 0 })
+  const [filter, setFilter] = useState({ skip: 0, limit: 6 })
+
+  const fetchData = useCallback(async (filter, cb) => {
+    let dataNFT = await Request.send({
+      method: "POST",
+      path: "/api/games/getListNFT",
+      data: filter
+    });
+    if (dataNFT) {
+      cb(dataNFT)
+    }
+  }, [filter])
 
   useEffect(() => {
-    let isMounted = false;
-    async function init() {
-      let dataNFT = await Request.send({
-        method: "POST",
-        path: "/api/games/getListNFT"
-      });
-
-      if (dataNFT && !isMounted) {
+    let isMounted = false
+    fetchData(filter, (dataNFT) => {
+      !isMounted &&
         setListNFT(dataNFT)
-      }
-    }
-    init()
+    })
     return () => {
-      isMounted = true;
+      isMounted = true
     }
-  }, [])
+  }, [fetchData])
+
+  async function handleUpdateUser(id) {
+    let res = await Request.send({
+      method: "POST",
+      path: "/api/users/update",
+      data: {
+        data: {
+          selectedNFT: id
+        }
+      }
+    });
+
+    if (res) {
+      toast.success("Selected NFT ID: " + id)
+    } else {
+      toast.error("Something went wrong. Please try again")
+    }
+  }
+
+  async function handleOnScroll(e) {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+
+    if (
+      Math.ceil((scrollTop) + clientHeight) === scrollHeight &&
+      filter.skip < listNFT.total
+    ) {
+      const newFilter = {
+        ...filter,
+        skip: filter.skip + 6
+      }
+      setFilter(newFilter)
+      fetchData(newFilter, (dataNFT) => {
+        setListNFT((prev) => ({
+          total: dataNFT.total,
+          data: [
+            ...prev.data,
+            ...dataNFT.data
+          ]
+        }))
+      })
+    }
+  }
 
   return (
     <container>
@@ -33,6 +81,7 @@ function Inventory({ setRoute, userData }) {
           width: CANVAS_WIDTH,
           height: CANVAS_HEIGHT
         }}
+        onScroll={handleOnScroll}
       >
         <nav>
           <button
@@ -47,18 +96,19 @@ function Inventory({ setRoute, userData }) {
         <div className="inventory-wapper">
           {
             listNFT.data.map(item => {
-              console.log(item);
               return (
                 <div
                   className={`
                     inventory-item 
-                    ${userData.selectedNFT === item.nftId ? "used" : ""}
+                    ${userData.selectedNFT === parseInt(item.nftId) ? "used" : ""}
                   `}
-                  id={item.nftId}
+                  key={item.nftId}
                 >
-                  <img src={`process.env.REACT_APP_API/idle${item.nftId}.json`} alt="nft" />
+                  <img src={`${process.env.REACT_APP_API}/idle/${item.nftId}.json`} alt="nft" />
                   <div>FdF ID: {item.nftId}</div>
-                  <button>Use</button>
+                  <button onClick={() => handleUpdateUser(item.nftId)}>
+                    {userData.selectedNFT === parseInt(item.nftId) ? "Used" : "Use"}
+                  </button>
                 </div>
               )
             })

@@ -52,7 +52,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.post('/update', async (req, res) => {
+router.post('/update', auth, async (req, res) => {
   const data = req.body.data || {}
   await User.updateOne(
     {

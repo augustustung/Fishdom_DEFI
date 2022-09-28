@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
-const HOST = process.env.REACT_APP_API || "https://fishdom-defi.herokuapp.com"
+const HOST = "https://fishdom-defi.herokuapp.com" // process.env.REACT_APP_API || 
 
 function send({
   method = 'get',
