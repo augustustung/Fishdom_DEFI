@@ -15,7 +15,7 @@ async function getList(req, res) {
   let filter = req.body.filter || {};
   let skip = req.body.skip || 0;
   let limit = req.body.limit || 20;
-  let order = req.body.order || { createdAt: -1 };
+  let order = JSON.parse(req.body.order || "{ \"createdAt\": -1 }");
   let data = await MarketFunctions.handleGetList(filter, skip, limit, order);
   if (data) {
     return res.status(200).json({ data })

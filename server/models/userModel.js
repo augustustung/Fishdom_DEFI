@@ -38,6 +38,10 @@ const userSchema = mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  selectedNFT: {
+    type: Number,
+    default: 0
   }
 })
 

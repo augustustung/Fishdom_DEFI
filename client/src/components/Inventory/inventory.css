@@ -1,0 +1,66 @@
+
+.inventory-container.fade-out nav {
+  left: 80%;
+  animation: fade-out 1s ease-out;
+}
+
+.inventory-container nav {
+  top: 70px;
+  height: fit-content;
+}
+
+.inventory-container nav button.common_button::before {
+  content: "Go back";
+}
+
+.inventory-container {
+  position: absolute;
+  top: 115px;
+  right: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin-right: auto;
+  overflow-y: auto;
+  margin-left: auto;
+}
+
+.inventory-container .inventory-wapper {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-gap: 10px;
+  padding: 0 24px 50px;
+  margin-top: 120px;
+}
+
+.inventory-container .inventory-wapper .inventory-item {
+  background-color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  padding: 20px 0;
+  font-size: 24px;
+}
+
+.inventory-container .inventory-wapper .inventory-item img {
+  width: 88%;
+  object-fit: cover;
+}
+
+.inventory-container .inventory-wapper .inventory-item div {
+  padding: 12px 0;
+}
+
+.inventory-container .inventory-wapper .inventory-item button {
+  background-color: rgb(61, 89, 214);
+  outline: none;
+  border: none;
+  border-radius: 5px;
+  padding: 4px 36px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.inventory-container .inventory-wapper .inventory-item.used button {
+  opacity: .3;
+  cursor: not-allowed;
+}

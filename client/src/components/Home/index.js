@@ -370,8 +370,8 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
         handleDecreasingTurn('/play');
         break;
       }
-      case 'ABOUT': {
-        window.open("https://www.facebook.com/huytung.novers", "_blank");
+      case 'INVENTORY': {
+        setRoute('/inventory')
         break;
       }
       default:
@@ -471,7 +471,7 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
                 <button className="common_button" onClick={() => handleClick("/play")} />
                 <button className="common_button" onClick={() => handleClick("/leader-board")}></button>
                 <button className="common_button" onClick={() => handleClick("BUY TURN")}></button>
-                <button className="common_button" onClick={() => handleClick("ABOUT")}></button>
+                <button className="common_button" onClick={() => handleClick("INVENTORY")}></button>
                 <button className="common_button" onClick={() => handleClick("LOGOUT")}></button>
               </>
             )

@@ -19,7 +19,7 @@
 }
 
 .button-container nav .common_button:nth-child(4)::before {
-  content: 'ABOUT';
+  content: 'INVENTORY';
 }
 
 .button-container nav .common_button:nth-child(5)::before {

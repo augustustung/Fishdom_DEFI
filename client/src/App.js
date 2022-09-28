@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import Home from './components/Home'
 import Play from './components/Play'
+import Inventory from './components/Inventory'
 import LeaderBoard from './components/LeaderBoard'
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useWeb3React } from "@web3-react/core";
 import { hooks as metaMaskHooks } from "./connectors/metaMask";
 import {
   hooks as walletConnectHooks
@@ -33,6 +33,10 @@ const LIST_ROUTE = [
   {
     path: "/play",
     render: Play
+  },
+  {
+    path: "/inventory",
+    render: Inventory
   }
 ]
 
@@ -42,9 +46,6 @@ function App() {
   const [route, setRoute] = useState("/")
   const [userData, setUserData] = useState()
   let Component = LIST_ROUTE.find((item) => item.path === route)
-  const [isConnectMetaMask, setConnectMetaMask] = useState(false);
-  const [isWrongNetWork, setIsWrongNetWork] = useState(false);
-  const { connector } = useWeb3React();
   const provider = useProvider();
   const providerW = useProviderW();
 
@@ -72,15 +73,12 @@ function App() {
 
   useEffect(() => {
     if (chainId && chainId != 97) {
-      setIsWrongNetWork(true);
       localStorage.setItem("METAMASK_CONNECT", "");
       localStorage.setItem("WALLET_CONNECT", "");
 
       setWalletData(null);
-      // connector.deactivate();
       toast.error("Wrong network");
     } else if (chainId == 97) {
-      setIsWrongNetWork(false);
     }
   }, [chainId, chainIdW]);
   //show error
@@ -90,7 +88,7 @@ function App() {
       console.log("error.name: ", error.name);
 
       if (error.message === "MetaMask not installed") {
-        setConnectMetaMask(true);
+        toast.error("MetaMask not installed")
         return;
       }
       toast.error(error.message);
@@ -176,24 +174,6 @@ function App() {
     getSigner();
   }, [provider, providerW, chainId, chainIdW]);
 
-  async function handleDepositIntoGame() {
-    let amount = window.prompt()
-    if (!amount) {
-      return;
-    }
-
-    let contractInstance = new ethers.Contract(
-      FishTokenInstance.networks[chainId].address,
-      FishTokenInstance.abi,
-      walletData
-    )
-
-    await contractInstance.transfer(
-      process.env.REACT_APP_HOST_WALLET,
-      ethers.utils.parseEther(amount)
-    )
-  }
-
   return (
     <>
       <div style={{ display: 'flex', justifyContent: "space-between" }}>
@@ -201,10 +181,7 @@ function App() {
           {`Address:  ${walletData?._address ? walletData?._address : ""}`}
         </div>
         <div>
-          <span>
-            {`FdT Balance:  ${userData?.balanceOf ? userData?.balanceOf : "0"}`}
-          </span>
-          <button onClick={handleDepositIntoGame}>Deposit into game</button>
+          {`FdT Balance:  ${userData?.balanceOf ? userData?.balanceOf : "0"}`}
         </div>
       </div>
       <Component.render

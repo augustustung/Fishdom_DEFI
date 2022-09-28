@@ -146,12 +146,45 @@ router.post("/mint", auth, async (req, res) => {
   return res.status(200).json({ msg: 'success' });
 });
 
+router.post("/getListNFT", auth, async (req, res) => {
+  let userId = req.user._id;
+  let limit = req.body.limit || 6;
+  let skip = req.body.skip || 0;
+
+  let userData = await UserModel.findById(userId);
+  if (!userData) {
+    return res.status(500).json({ msg: 'failed' });
+  }
+
+  let data = await NFTModel.find({
+    walletAddress: userData.walletAddress,
+  }).limit(limit).skip(skip);
+  let count = 0;
+  if (data && data.length > 0) {
+    count = await NFTModel.count({
+      walletAddress: userData.walletAddress,
+    });
+  }
+
+  return res.status(200).json({ data: data, count: count });
+});
+
 router.get("/metadata/:id.json", async (req, res) => {
   let id = req.params.id;
   if (id) {
     id = parseInt(id);
     let entropy = (id + 100 - 2 + 44 - 5 + 31) % 5;
     return res.sendFile(path.resolve(__filename, '../../metadata/player/' + entropy + '.png'));
+  }
+  return res.status(500).json({ msg: 'invalid id' });
+});
+
+router.get("/idle/:id.json", async (req, res) => {
+  let id = req.params.id;
+  if (id) {
+    id = parseInt(id);
+    let entropy = (id + 100 - 2 + 44 - 5 + 31) % 5;
+    return res.sendFile(path.resolve(__filename, '../../metadata/idle/' + entropy + '.png'));
   }
   return res.status(500).json({ msg: 'invalid id' });
 });
