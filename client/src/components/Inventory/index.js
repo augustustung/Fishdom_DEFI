@@ -1,23 +1,21 @@
-import { useRef, useEffect, useState, memo } from "react";
+import { useEffect, useState, memo } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../../const';
 import './inventory.css';
-// import Request from '../../Axios';
+import Request from '../../Axios';
 
-function Inventory({ route, setRoute, userData }) {
+function Inventory({ setRoute, userData }) {
   const [listNFT, setListNFT] = useState({ data: [], total: 0 })
 
   useEffect(() => {
     let isMounted = false;
     async function init() {
-      let resDataLeaderBoard = await Request.send({
-        method: "GET",
-        path: "/api/games/leader-board"
+      let dataNFT = await Request.send({
+        method: "POST",
+        path: "/api/games/getListNFT"
       });
 
-      if (resDataLeaderBoard && resDataLeaderBoard.length > 0 && !isMounted) {
-        setDataLeaderBoard(resDataLeaderBoard)
-      } else {
-        setDataLeaderBoard([])
+      if (dataNFT && !isMounted) {
+        setListNFT(dataNFT)
       }
     }
     init()
@@ -48,7 +46,8 @@ function Inventory({ route, setRoute, userData }) {
         </nav>
         <div className="inventory-wapper">
           {
-            listNFT.map(item => {
+            listNFT.data.map(item => {
+              console.log(item);
               return (
                 <div
                   className={`
@@ -57,7 +56,7 @@ function Inventory({ route, setRoute, userData }) {
                   `}
                   id={item.nftId}
                 >
-                  <img src={item.image} alt="nft" />
+                  <img src={`process.env.REACT_APP_API/idle${item.nftId}.json`} alt="nft" />
                   <div>FdF ID: {item.nftId}</div>
                   <button>Use</button>
                 </div>

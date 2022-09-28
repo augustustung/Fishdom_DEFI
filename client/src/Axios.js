@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
-const HOST = process.env.REACT_APP_API || "http://localhost:5000"
+const HOST = process.env.REACT_APP_API || "https://fishdom-defi.herokuapp.com"
 
 function send({
   method = 'get',
@@ -18,7 +18,7 @@ function send({
     const dataString = window.localStorage.getItem('user-data')
     if (dataString) {
       const newData = JSON.parse(dataString)
-      headers["auth-token"] = `${newData.token}`
+      headers["authorization"] = `Bearer ${newData.token}`
     }
     axios({
       method,
@@ -34,28 +34,26 @@ function send({
         const { response = {} } = error
 
         const result = response.data ? response.data : null
-        if (!result) {
-        } else {
-          const { statusCode, message: data } = result
 
-          if (statusCode === 401) {
-            toast.warn(data || 'Somethig was wrong')
-            setTimeout(() => {
-              window.localStorage.clear()
-              window.location.href = '/'
-            }, 1000)
-          } else if (
-            (statusCode === 401 && data === 'Unauthorized') ||
-            (statusCode === 403 && data === 'InvalidToken')
-          ) {
+        const { status: statusCode, msg: data } = response
+
+        if (statusCode === 401) {
+          toast.warn(data || 'Somethig was wrong')
+          setTimeout(() => {
             window.localStorage.clear()
-            window.location.href = '/'
-          } else if (statusCode === 505) {
-            window.localStorage.clear()
-            window.location.href = '/'
-          } else {
-            return resolve(result)
-          }
+            window.location.reload()
+          }, 1000)
+        } else if (
+          (statusCode === 401 && data === 'Unauthorized') ||
+          (statusCode === 403 && data === 'InvalidToken')
+        ) {
+          window.localStorage.clear()
+          window.location.reload()
+        } else if (statusCode === 505) {
+          window.localStorage.clear()
+          window.location.reload()
+        } else {
+          return resolve(result)
         }
       })
   })

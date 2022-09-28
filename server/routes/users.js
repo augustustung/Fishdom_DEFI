@@ -52,6 +52,17 @@ router.post('/login', async (req, res) => {
   }
 });
 
+router.post('/update', async (req, res) => {
+  const data = req.body.data || {}
+  await User.updateOne(
+    {
+      id: req.user._id
+    },
+    data
+  );
+  return res.status(200).json({ msg: "success" })
+});
+
 router.post("/deposit", auth, manager.requestDepositFishdomToken);
 
 router.post("/withdraw", auth, manager.requestWithdraw);
