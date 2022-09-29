@@ -4,7 +4,7 @@ import './inventory.css';
 import Request from '../../Axios';
 import { toast } from 'react-toastify'
 
-function Inventory({ setRoute, userData }) {
+function Inventory({ setRoute, userData, setUserData }) {
   const [listNFT, setListNFT] = useState({ data: [], total: 0 })
   const [filter, setFilter] = useState({ skip: 0, limit: 6 })
 
@@ -42,6 +42,7 @@ function Inventory({ setRoute, userData }) {
     });
 
     if (res) {
+      setUserData({ selectedNFT: id })
       toast.success("Selected NFT ID: " + id)
     } else {
       toast.error("Something went wrong. Please try again")
@@ -100,7 +101,7 @@ function Inventory({ setRoute, userData }) {
                 <div
                   className={`
                     inventory-item 
-                    ${userData.selectedNFT === parseInt(item.nftId) ? "used" : ""}
+                    ${parseInt(userData.selectedNFT) === parseInt(item.nftId) ? "used" : ""}
                   `}
                   key={item.nftId}
                 >

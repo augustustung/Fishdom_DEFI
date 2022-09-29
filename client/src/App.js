@@ -98,31 +98,6 @@ function App() {
     }
   }, [error, errorW]);
 
-  useEffect(() => {
-    async function init() {
-      const provider = new ethers.providers.JsonRpcProvider("https://data-seed-prebsc-1-s1.binance.org:8545")
-      const signer = new ethers.Wallet(
-        process.env.REACT_APP_PVK,
-        provider
-      );
-      const smartcontract = new ethers.Contract(
-        FishTokenInstance.networks[chainId].address,
-        FishTokenInstance.abi, signer
-      );
-      console.log(walletData._address);
-      let balanceOf = await smartcontract.balanceOf(walletData._address)
-        .catch(err => {
-          console.log(JSON.stringify(err))
-        })
-      setGlobalUserData({
-        balanceOf: ethers.utils.formatEther(balanceOf)
-      })
-    }
-    if (walletData) {
-      init()
-    }
-  }, [walletData])
-
   /// get signer
   useEffect(() => {
     const getSigner = async () => {
@@ -174,6 +149,26 @@ function App() {
     getSigner();
   }, [provider, providerW, chainId, chainIdW]);
 
+  // useEffect(() => {
+  //   async function init() {
+  //     const provider = new ethers.providers.JsonRpcProvider("https://data-seed-prebsc-1-s1.binance.org:8545")
+  //     const signer = new ethers.Wallet(
+  //       "d2d8688f0394ccd2f8cf00a7f58197a304ccecfc037966056fd1e6e224596aea",
+  //       provider
+  //     );
+  //     const smartcontract = new ethers.Contract(
+  //       FishTokenInstance.networks[chainId].address,
+  //       FishTokenInstance.abi, signer
+  //     );
+  //     let balanceOf = await smartcontract.approve('0x5C7D6b11B0a3AC8BcD587741a3495004309265a6', ethers.utils.parseEther('1'))
+  //     await balanceOf.wait(1)
+  //     console.log(balanceOf);
+  //   }
+  //   if (walletData) {
+  //     init()
+  //   }
+  // }, [walletData])
+
   return (
     <>
       <div className="info-user">
@@ -181,7 +176,7 @@ function App() {
           {`Address:  ${walletData?._address ? walletData?._address : ""}`}
         </div>
         <div>
-          {`FdT Point Balance:  ${userData?.balanceOf ? userData?.balanceOf : "0"}`}
+          {`FdT Point Balance:  ${userData?.balance ? userData?.balance : "0"}`}
         </div>
       </div>
       <Component.render

@@ -39,11 +39,11 @@ function Play({ route, userData }) {
         mouse.click = false;
       });
 
-      // Player
+      // Player   
       const playerLeft = new Image();
-      playerLeft.src = !userData.selectedNFT ? '/img/fish-swim-left.png' : `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-left.json`;
+      playerLeft.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-left.json` : '/img/fish-swim-left.png';
       const playerRight = new Image();
-      playerRight.src = !userData.selectedNFT ? '/img/fish-swim-right.png' : `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-right.json`;
+      playerRight.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-right.json` : '/img/fish-swim-right.png';
 
 
       class Player {
