@@ -96,3 +96,15 @@ button.common_button:hover::before {
 @keyframes fade-out {
   100% { opacity: 0; }
 }
+
+.info-user {
+  display: flex;
+  justify-content: space-between;
+}
+
+.info-user > div {
+  color: #fff;
+  font-weight: 500;
+  font-size: 16px;
+}
+

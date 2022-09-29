@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 let score = 0;
 let gameFrame = 0;
 
-function Play({ route }) {
+function Play({ route, userData }) {
   const canvasRef = useRef()
   const [ctx, setCtx] = useState()
   const [isGamePlay, setIsGamePlay] = useState(false)
@@ -41,9 +41,10 @@ function Play({ route }) {
 
       // Player
       const playerLeft = new Image();
-      playerLeft.src = '/img/fish-swim-left.png';
+      playerLeft.src = !userData.selectedNFT ? '/img/fish-swim-left.png' : `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-left.json`;
       const playerRight = new Image();
-      playerRight.src = '/img/fish-swim-right.png';
+      playerRight.src = !userData.selectedNFT ? '/img/fish-swim-right.png' : `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-right.json`;
+
 
       class Player {
         constructor() {

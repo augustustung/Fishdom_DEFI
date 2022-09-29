@@ -78,10 +78,10 @@ router.post("/buy-turn", auth, async (req, res) => {
     return res.status(500).json({ msg: "Invalid number of turns " });
   }
   const user = await UserModel.findById(req.user._id);
-  if (userData.balance >= 1000 * req.body.turn) {
+  if (user.balance >= 1000 * req.body.turn) {
     await user.update({
       playTurn: user.playTurn + req.body.turn,
-      balance: userData.balance - 1000 * req.body.turn
+      balance: user.balance - 1000 * req.body.turn
     });
     await user.save();
     res.status(200).json({ msg: 'ok' });
@@ -178,7 +178,7 @@ router.get("/metadata/:id.json", async (req, res) => {
     id = id.split('-')
     let parseId = parseInt(id[0]);
     let entropy = (parseId + 100 - 2 + 44 - 5 + 31) % 5;
-    return res.sendFile(path.resolve(__filename, '../../metadata/player/' + entropy + id[1] + '.png'));
+    return res.sendFile(path.resolve(__filename, '../../metadata/player/' + entropy + '-' + id[1] + '.png'));
   }
   return res.status(500).json({ msg: 'invalid id' });
 });

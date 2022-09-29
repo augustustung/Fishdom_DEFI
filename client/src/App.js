@@ -176,12 +176,12 @@ function App() {
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: "space-between" }}>
+      <div className="info-user">
         <div>
           {`Address:  ${walletData?._address ? walletData?._address : ""}`}
         </div>
         <div>
-          {`FdT Balance:  ${userData?.balanceOf ? userData?.balanceOf : "0"}`}
+          {`FdT Point Balance:  ${userData?.balanceOf ? userData?.balanceOf : "0"}`}
         </div>
       </div>
       <Component.render

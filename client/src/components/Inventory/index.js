@@ -104,7 +104,7 @@ function Inventory({ setRoute, userData }) {
                   `}
                   key={item.nftId}
                 >
-                  <img src={`${process.env.REACT_APP_API}/idle/${item.nftId}.json`} alt="nft" />
+                  <img src={`${process.env.REACT_APP_API}/api/games/idle/${item.nftId}.json`} alt="nft" />
                   <div>FdF ID: {item.nftId}</div>
                   <button onClick={() => handleUpdateUser(item.nftId)}>
                     {userData.selectedNFT === parseInt(item.nftId) ? "Used" : "Use"}

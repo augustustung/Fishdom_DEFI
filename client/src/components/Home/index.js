@@ -55,9 +55,9 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
 
       // Player
       const playerLeft = new Image();
-      playerLeft.src = '/img/fish-swim-left.png';
+      playerLeft.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-left.json` : '/img/fish-swim-left.png';
       const playerRight = new Image();
-      playerRight.src = '/img/fish-swim-right.png';
+      playerRight.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-right.json` : '/img/fish-swim-right.png';
 
       class Player {
         constructor() {
@@ -335,8 +335,8 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
     })
   }
 
-  async function handleDecreasingTurn(path) {
-    Request.send({
+  async function handleDecreasingTurn() {
+    await Request.send({
       method: "POST",
       path: "/api/games/play"
     }).then((res) => {
@@ -344,7 +344,6 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
         setUserData({
           playTurn: userData.playTurn - 1
         })
-        setRoute(path)
       } else {
         toast.error("error from server");
       }
@@ -367,7 +366,15 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
         break;
       }
       case '/play': {
-        handleDecreasingTurn('/play');
+        console.log(userData?.playTurn)
+        if (!(userData?.playTurn)) {
+          toast.error("You have no turn to play")
+        } else if (!(userData?.selectedNFT)) {
+          toast.error("Please select an FdF NFT to play")
+        } else {
+          handleDecreasingTurn();
+          setRoute('/play')
+        }
         break;
       }
       case 'INVENTORY': {
