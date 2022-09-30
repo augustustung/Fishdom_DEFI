@@ -2,11 +2,15 @@
 const MarketFunctions = require('./functions');
 
 async function sellItem(req, res) {
-  let txHash = req.body.txHash;
-  let data = await MarketFunctions.handleSellItem(txHash, req.user._id);
-  if (data) {
-    return res.status(200).json({ data })
-  } else {
+  try {
+    let txHash = req.body.txHash;
+    let data = await MarketFunctions.handleSellItem(txHash, req.user._id);
+    if (data) {
+      return res.status(200).json({ data })
+    } else {
+      return res.status(500).json({ msg: "failed" });
+    }
+  } catch (error) {
     return res.status(500).json({ msg: "failed" });
   }
 }
@@ -25,21 +29,29 @@ async function getList(req, res) {
 }
 
 async function buyItem(req, res) {
-  let txHash = req.body.txHash;
-  let data = await MarketFunctions.handleBuyItem(txHash, req.user._id);
-  if (data) {
-    return res.status(200).json({ data })
-  } else {
+  try {
+    let txHash = req.body.txHash;
+    let data = await MarketFunctions.handleBuyItem(txHash, req.user._id);
+    if (data) {
+      return res.status(200).json({ data })
+    } else {
+      return res.status(500).json({ msg: "failed" });
+    }
+  } catch (error) {
     return res.status(500).json({ msg: "failed" });
   }
 }
 
 async function withdraw(req, res) {
-  let txHash = req.body.txHash;
-  let data = await MarketFunctions.handleWithdraw(txHash, req.user._id);
-  if (data) {
-    return res.status(200).json({ data })
-  } else {
+  try {
+    let txHash = req.body.txHash;
+    let data = await MarketFunctions.handleWithdraw(txHash, req.user._id);
+    if (data) {
+      return res.status(200).json({ data })
+    } else {
+      return res.status(500).json({ msg: "failed" });
+    }
+  } catch (error) {
     return res.status(500).json({ msg: "failed" });
   }
 }
