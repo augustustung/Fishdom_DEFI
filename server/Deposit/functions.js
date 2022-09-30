@@ -31,7 +31,7 @@ async function _decodeAndGetBalance(provider, txHash, userData) {
       if (!(
         txUncofirmed.data.includes('0xa9059cbb') &&
         txUncofirmed.to === FishdomToken.networks[97].address &&
-        txUncofirmed.from === userData.walletAddress
+        txUncofirmed.from.toLowerCase() === userData.walletAddress
       )) {
         resolve(undefined);
         return;

@@ -24,7 +24,7 @@ async function _getDetailItem(provider, txHash, userData) {
   if (eventData && eventData.args && eventData.args.length > 0) {
     if (!(
       txUncofirmed.to === FishdomMarket.networks[97].address &&
-      txUncofirmed.from === userData.walletAddress
+      txUncofirmed.from.toLowerCase() === userData.walletAddress
     )) {
       throw "invalid sender";
     }
