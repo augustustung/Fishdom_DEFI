@@ -4,30 +4,34 @@ const User = require('../models/userModel');
 const DepositHistory = require('../models/depositHistory');
 
 async function requestDepositFishdomToken(req, res) {
-  let txHash = req.body.txHash;
-  let existingTx = await DepositHistory.findOne({
-    txHash: txHash
-  });
-  if (existingTx) {
-    return res.status(500).json({ msg: "EXISTING_TXHAS" })
-  }
-  let userData = await User.findById(req.user._id);
-  let balance = await functions.handleDepositToken(txHash, userData);
-  if (balance) {
-    await userData.update({
-      balance: userData.balance + parseFloat(balance)
-    })
-    await userData.save();
-    await DepositHistory.create({
-      userId: req.user._id,
-      txHash: txHash,
-      amount: parseFloat(balance)
+  try {
+    let txHash = req.body.txHash;
+    let existingTx = await DepositHistory.findOne({
+      txHash: txHash
     });
-    return res.status(200).json({
-      balance: userData.balance + parseFloat(balance)
-    })
+    if (existingTx) {
+      return res.status(500).json({ msg: "EXISTING_TXHASH" })
+    }
+    let userData = await User.findById(req.user._id);
+    let balance = await functions.handleDepositToken(txHash, userData);
+    if (balance) {
+      await userData.update({
+        balance: userData.balance + parseFloat(balance)
+      })
+      await userData.save();
+      await DepositHistory.create({
+        userId: req.user._id,
+        txHash: txHash,
+        amount: parseFloat(balance)
+      });
+      return res.status(200).json({
+        balance: userData.balance + parseFloat(balance)
+      })
+    }
+    return res.status(500).json({ msg: "failed" })
+  } catch (error) {
+    return res.status(500).json({ msg: "failed" })
   }
-  return res.status(500).json({ msg: "failed" })
 }
 
 async function requestWithdraw(req, res) {

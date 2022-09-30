@@ -16,11 +16,13 @@ async function _decodeAndGetBalance(provider, txHash, userData) {
   return new Promise(async (resolve) => {
     try {
       let {
-        dataDecoded: amount,
+        eventData,
         txUncofirmed,
         txConfirmed
-      } = await UtilFunctions.decodeTxData(provider, txHash, ['uint256']);
-      amount = amount[0];
+      } = await UtilFunctions.decodeTxData(provider, txHash, [`
+        event Transfer(address indexed from, address indexed to, uint256 value)
+      `]);
+      const amount = eventData.args.value
       /* check if 
         * - data contains "0xa9059cbb" (signature of function transfer) 
         * - chainId is correct
@@ -41,6 +43,7 @@ async function _decodeAndGetBalance(provider, txHash, userData) {
       } else {
         resolve(undefined);
       }
+      resolve(undefined)
     } catch (error) {
       console.error("error get tx: " + txHash);
       console.error(error);
@@ -54,11 +57,15 @@ async function handleDepositToken(txHash, userData) {
     try {
       const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_ENDPOINT)
       let balanceOfTx = await _decodeAndGetBalance(provider, txHash, userData);
-      balanceOfTx = ethers.utils.formatEther(balanceOfTx);
-      resolve(balanceOfTx);
+      if (balanceOfTx) {
+        balanceOfTx = ethers.utils.formatEther(balanceOfTx);
+        resolve(balanceOfTx);
+      } else {
+        reject('failed');
+      }
     } catch (error) {
       console.error(__filename, error);
-      reject(undefined);
+      reject('failed');
     }
   })
 }
