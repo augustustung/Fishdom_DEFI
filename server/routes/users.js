@@ -23,7 +23,7 @@ router.post('/register', async (req, res) => {
       const newUser = new User({
         name: req.body.name,
         password: hash,
-        walletAddress: req.body.walletAddress
+        walletAddress: req.body.walletAddress.toLowerCase()
       });
       newUser
         .save()
@@ -40,7 +40,7 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  const user = await User.findOne({ walletAddress: req.body.walletAddress });
+  const user = await User.findOne({ walletAddress: req.body.walletAddress.toLowerCase() });
   if (!user) {
     return res.status(200).json({ msg: "NOT_FOUND" })
   } else {
