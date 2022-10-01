@@ -187,7 +187,7 @@ async function handleWithdraw(txHash, userId) {
       let userData = await User.findById(userId);
       const {
         eventData, txUncofirmed, txConfirmed
-      } = UtilFunctions.decodeTxData(
+      } = await UtilFunctions.decodeTxData(
         provider, txHash,
         [`event WithdrawItem(
           uint256 indexed itemId,
@@ -196,32 +196,30 @@ async function handleWithdraw(txHash, userId) {
         )`]
       );
 
-
       if (!(txConfirmed && txConfirmed.to === FishdomMarket.networks[97].address)) {
         console.log('invalid contract');
         return undefined;
       }
 
-      if (!(txConfirmed && txConfirmed.from === userData.walletAddress)) {
-        console.log('invalid buyer');
+      if (!(txConfirmed && txConfirmed.from.toLowerCase() === userData.walletAddress)) {
+        console.log('invalid owner');
         return undefined;
       }
 
       if (eventData && eventData.args && eventData.args.length > 0) {
         const { args } = eventData;
-        if (!args.owner === userData.walletAddress) {
+        if (!args.owner.toLowerCase() === userData.walletAddress) {
           reject("not owner");
           return;
         } else {
           await NFTModel.updateOne(
-            { nftId: args.tokenId },
-            { walletAddress: args.buyer }
+            { nftId: args.tokenId.toString() },
+            { walletAddress: args.owner.toLowerCase() }
           );
           await Market.updateOne(
             {
-              tokenId: args.tokenId,
-              itemId: args.itemId,
-              seller: args.seller
+              tokenId: args.tokenId.toString(),
+              itemId: args.itemId.toString()
             },
             {
               isDeleted: 1
