@@ -137,11 +137,11 @@ router.post("/mint", auth, async (req, res) => {
 
   let ownerOf = await contractInstance.ownerOf(nftId);
   if (ownerOf !== userData.walletAddress) {
-    return res.status(500).json({ msg: 'failed' });
+    return res.status(500).json({ msg: 'not owner' });
   }
 
   await NFTModel.create({
-    walletAddress: userData.walletAddress,
+    walletAddress: userData.walletAddress.toLowerCase(),
     nftId: nftId.toString()
   })
 
