@@ -56,11 +56,12 @@ router.post('/update', auth, async (req, res) => {
   const data = req.body.data || {}
   await User.updateOne(
     {
-      id: req.user._id
+      _id: req.user._id
     },
     data
   );
-  return res.status(200).json({ msg: "success" })
+  const user = await User.findById(req.user._id);
+  return res.status(200).json({ data: user });
 });
 
 router.post("/deposit", auth, manager.requestDepositFishdomToken);
