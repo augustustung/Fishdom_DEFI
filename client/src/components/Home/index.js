@@ -327,7 +327,8 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
       if (res && res.msg && res.msg === 'ok') {
         toast.success('Buy turn success')
         setUserData({
-          playTurn: userData.playTurn + parseInt(turn)
+          playTurn: userData.playTurn + parseInt(turn),
+          balance: userData.balance - parseFloat(1000 * parseInt(turn))
         })
       } else {
         toast.error("Buy error");
@@ -444,6 +445,7 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
               <div className="form">
                 <Form
                   name="basic"
+                  layout="vertical"
                   onFinish={onRegisterNewAccount}
                   // onFinishFailed={onFinishFailed}
                   autoComplete="off"

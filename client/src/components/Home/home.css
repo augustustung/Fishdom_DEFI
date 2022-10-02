@@ -26,9 +26,18 @@
   content: 'LOG OUT';
 }
 
+.button-container nav {
+  width: 250px;
+}
 
 .form {
   background-color: cornflowerblue;
+  padding: 12px;
+  border-radius: 5px;
+}
+
+.form label {
+  color:  #fff !important;
 }
 
 .form .center {

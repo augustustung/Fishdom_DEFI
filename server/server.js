@@ -17,9 +17,11 @@ const port = process.env.PORT || 5000;
 const gamesRouter = require("./routes/games");
 const usersRouter = require("./routes/users");
 const marketRouter = require("./routes/markets");
+const stakingRouter = require("./routes/staking");
 app.use("/api/games", gamesRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/markets", marketRouter);
+app.use("/api/stakings", stakingRouter);
 app.use(express.static(path.join(__dirname, "./metadata")));
 
 
