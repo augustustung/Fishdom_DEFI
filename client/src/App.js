@@ -10,8 +10,6 @@ import {
   hooks as walletConnectHooks
 } from "./connectors/walletConnect";
 import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
-import { ethers } from 'ethers'
-import FishTokenInstance from './contracts/FishdomToken.json'
 
 const {
   useChainId: useChainIdW,

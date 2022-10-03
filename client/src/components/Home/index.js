@@ -134,7 +134,7 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
       let adjustY = -3;
       ctx.fillStyle = 'white';
       ctx.font = '17px Verdana';
-      ctx.fillText('FISHDOM', 20, 42);
+      ctx.fillText('Fd DEFI', 20, 42);
       //ctx.font = '19px Verdana';
       //ctx.fillText('TEXT', 36, 49);
       const textCoordinates = ctx.getImageData(0, 0, 100, 100);

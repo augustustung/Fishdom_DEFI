@@ -6,6 +6,10 @@ import { toast } from "react-toastify";
 let score = 0;
 let gameFrame = 0;
 
+function randomIntFromInterval(min, max) { // min and max included 
+  return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
 function Play({ route, userData }) {
   const canvasRef = useRef()
   const [ctx, setCtx] = useState()
@@ -110,6 +114,12 @@ function Play({ route, userData }) {
             ctx.drawImage(playerRight, this.frameX * this.spriteWidth, this.frameY * this.spriteHeight, this.spriteWidth, this.spriteHeight, 0 - 60, 0 - 45, this.spriteWidth * 0.8, this.spriteHeight * 0.8);
           }
           ctx.restore();
+
+          // ctx.fillStyle = 'blue'
+          // ctx.beginPath()
+          // ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+          // ctx.fill()
+          // ctx.closePath()
         }
       }
       const player = new Player();
@@ -188,7 +198,7 @@ function Play({ route, userData }) {
       let adjustY = -3;
       ctx.fillStyle = 'white';
       ctx.font = '17px Verdana';
-      ctx.fillText('AQUARD TOKEN', 20, 42);
+      ctx.fillText('Fd DEFI', 20, 42);
       //ctx.font = '19px Verdana';
       //ctx.fillText('TEXT', 36, 49);
       const textCoordinates = ctx.getImageData(0, 0, 100, 100);
@@ -306,7 +316,7 @@ function Play({ route, userData }) {
 
 
       const enemyImage = new Image();
-      enemyImage.src = '/img/__cartoon_fish_06_black_swim.png';
+      enemyImage.src = `/img/enemy_${randomIntFromInterval(1, 6)}.png`;
 
       class Enemy {
         constructor() {
@@ -332,6 +342,12 @@ function Play({ route, userData }) {
             this.spriteWidth, this.spriteHeight,
             this.x - this.offset.x, this.y - this.offset.y, this.spriteWidth / 3, this.spriteHeight / 3
           )
+
+          // ctx.fillStyle = 'red'
+          // ctx.beginPath()
+          // ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+          // ctx.fill()
+          // ctx.closePath()
         }
 
         update() {
@@ -340,6 +356,7 @@ function Play({ route, userData }) {
             this.x = CANVAS_HEIGHT + 200;
             this.y = Math.random() * (CANVAS_HEIGHT - 150) + 90;
             this.speed = Math.random() * 2 + 2;
+            enemyImage.src = `/img/enemy_${randomIntFromInterval(1, 6)}.png`;
           }
 
           if (gameFrame % 5 === 0) {
@@ -369,7 +386,7 @@ function Play({ route, userData }) {
           const dx = this.x - player.x
           const dy = this.y - player.y
           const distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < this.radius + player.radius - 10) {
+          if (distance < this.radius + player.radius - 25) {
             handleGameOver()
           }
         }
@@ -409,6 +426,7 @@ function Play({ route, userData }) {
             this.spriteWidth, this.spriteHeight,
             this.x - this.offset.x, this.y - this.offset.y, this.spriteWidth, this.spriteHeight
           )
+          // ctx.fillRect(this.x, this.y, this.spriteWidth, this.spriteHeight);
         }
 
         update() {
@@ -443,10 +461,12 @@ function Play({ route, userData }) {
 
           // check collision with player
           if (
-            this.x + this.spriteWidth + (player.spriteWidth / 4) > player.x &&
-            this.x + this.spriteWidth + (player.spriteWidth / 4) < player.x + this.spriteWidth &&
-            this.y - player.y < player.spriteHeight / 4 &&
-            this.y - player.y > - player.spriteHeight / 4
+            this.x + this.spriteWidth > player.x &&
+            this.x < player.x + player.radius &&
+            (
+              (this.y > player.y && this.y < player.y + player.radius) ||
+              (this.y < player.y && this.y + this.spriteHeight > player.y)
+            )
           ) {
             handleGameOver()
           }
@@ -480,7 +500,7 @@ function Play({ route, userData }) {
         handleBackGround();
         handleBubbles();
         handleEnemies();
-        // handleKillers();
+        handleKillers();
         player.update();
         player.draw();
         ctx.fillStyle = 'rgba(34,147,214,1)';
