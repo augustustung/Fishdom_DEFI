@@ -36,13 +36,13 @@ function Inventory({ setRoute, userData, setUserData }) {
       path: "/api/users/update",
       data: {
         data: {
-          selectedNFT: id
+          selectedNFT: parseInt(id)
         }
       }
     });
 
-    if (res) {
-      setUserData({ selectedNFT: id })
+    if (res && res.data) {
+      setUserData(res.data)
       toast.success("Selected NFT ID: " + id)
     } else {
       toast.error("Something went wrong. Please try again")

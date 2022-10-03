@@ -451,7 +451,7 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
                   autoComplete="off"
                 >
                   <Form.Item
-                    label="name"
+                    label="Name"
                     name="name"
                     rules={[{ required: true, message: 'Please input your name!' }]}
                   >
@@ -459,7 +459,7 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
                   </Form.Item>
 
                   <Form.Item
-                    label="password"
+                    label="Password"
                     name="password"
                     rules={[{ required: true, message: 'Please input your password!' }]}
                   >

@@ -78,7 +78,6 @@ function App() {
 
       setWalletData(null);
       toast.error("Wrong network");
-    } else if (chainId == 97) {
     }
   }, [chainId, chainIdW]);
   //show error

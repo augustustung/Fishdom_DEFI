@@ -30,10 +30,10 @@ export const CHAINS = {
     urls: ["https://data-seed-prebsc-1-s3.binance.org:8545"],
     name: "BNB testnet",
   },
-  42: {
-    urls: ["https://kovan.infura.io/v3/"],
-    name: "Kovan testnet",
-  },
+  // 42: {
+  //   urls: ["https://kovan.infura.io/v3/"],
+  //   name: "Kovan testnet",
+  // },
 };
 export const URLS = Object.keys(CHAINS).reduce((accumulator, chainId) => {
   const validURLs = CHAINS[Number(chainId)].urls;
