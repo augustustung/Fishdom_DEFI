@@ -1,24 +1,89 @@
-import { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../../const';
 import './home.css';
-import { hooks, metaMask } from "../../connectors/metaMask";
-import { chainId } from '../../constant/chain'
-import { useWeb3React } from "@web3-react/core";
 import Request from '../../Axios'
 import { Button, Form, Input } from 'antd';
 import { toast } from "react-toastify";
-
-const {
-  useIsActive,
-} = hooks;
+import { connectorsByName } from '../../connector';
+import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core';
+import {
+  URI_AVAILABLE
+} from '@web3-react/walletconnect-connector';
+import { useEagerConnect, useInactiveListener } from '../../hooks';
+import * as MetaMaskFunctions from '../../metamask';
+import chains from '../../constant/chain';
 
 let gameFrame = 0;
 
 function Home({ route, setRoute, userData, setUserData, walletData, setWalletData }) {
   const canvasRef = useRef()
   const [ctx, setCtx] = useState()
-  const { connector } = useWeb3React();
-  const isActive = useIsActive();
+  const context = useWeb3React();
+  const {
+    connector,
+    activate,
+    deactivate,
+    account,
+    error,
+    library
+  } = context;
+
+
+  // handle logic to recognize the connector currently being activated
+  const [activatingConnector, setActivatingConnector] = React.useState();
+  React.useEffect(() => {
+    console.log('running');
+    if (activatingConnector && activatingConnector === connector) {
+      setActivatingConnector(undefined);
+    }
+  }, [activatingConnector, connector]);
+
+  React.useEffect(() => {
+    const REQUIRED_CHAIN = chains.find(chain => chain.chainId === (process.env.NODE_ENV === 'production' ? 56 : 97));
+    if (error && error instanceof UnsupportedChainIdError) {
+      MetaMaskFunctions.switchChain('0x' + Number(REQUIRED_CHAIN.chainId).toString(16)).catch(error => {
+        if (error.code === 4902) {
+          MetaMaskFunctions.addChain({
+            chainId: '0x' + REQUIRED_CHAIN.chainId.toString(16),
+            chainName: REQUIRED_CHAIN.chainName,
+            nativeCurrency: REQUIRED_CHAIN.nativeCurrency,
+            rpcUrls: REQUIRED_CHAIN.rpcUrls,
+            blockExplorerUrls: REQUIRED_CHAIN.blockExplorerUrls,
+          }).catch(err => {
+            alert('Cannot add ' + REQUIRED_CHAIN.chainName + ' to your MetaMask');
+          });
+        }
+      });
+    }
+
+    return () => { };
+  }, [error]);
+
+  // handle logic to eagerly connect to the injected ethereum provider, if it exists and has granted access already
+  const triedEager = useEagerConnect();
+
+  // handle logic to connect in reaction to certain events on the injected ethereum provider, if it exists
+  useInactiveListener(!triedEager || !!activatingConnector);
+
+  React.useEffect(() => {
+    if (!(!triedEager || !!activatingConnector)) {
+      let walletData = library
+        .getSigner(account)
+      setWalletData(walletData)
+    }
+  }, [triedEager, activatingConnector])
+
+  React.useEffect(() => {
+    console.log('running');
+    const logURI = uri => {
+      console.log('WalletConnect URI', uri);
+    };
+    connectorsByName.WalletConnect.on(URI_AVAILABLE, logURI);
+
+    return () => {
+      connectorsByName.WalletConnect.off(URI_AVAILABLE, logURI);
+    };
+  }, []);
 
   useEffect(() => {
     let requestAnimationFrameId
@@ -357,9 +422,7 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
         localStorage.clear()
         setUserData(undefined)
         setWalletData(undefined)
-        if (isActive) {
-          connector.deactivate();
-        }
+        deactivate();
         break
       }
       case "BUY TURN": {
@@ -397,16 +460,6 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
     }
   }
 
-  async function onConnectMetaMaskWallet() {
-    localStorage.setItem("METAMASK_CONNECT", "");
-    localStorage.setItem("WALLET_CONNECT", "");
-    metaMask.activate(chainId);
-  }
-
-  async function onConnectWalletConnect() {
-
-  }
-
   const onRegisterNewAccount = async (values) => {
     let userDetail = await Request.send({
       method: "POST",
@@ -424,22 +477,28 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
       <canvas id="game" width={CANVAS_WIDTH} height={CANVAS_HEIGHT} ref={canvasRef}></canvas>
       <div className="button-container">
         <nav>
-          {
-            (!walletData && !userData) && (
-              <>
+          {Object.keys(connectorsByName).map(name => {
+            const currentConnector = connectorsByName[name];
+            const connected = currentConnector === connector;
+            const disabled = !triedEager || !!activatingConnector || connected || !!error;
+
+            if (!walletData && !userData) {
+              return (
                 <button
                   className="common_button"
-                  id="connectMeteMaskWallet"
-                  onClick={onConnectMetaMaskWallet}
-                ></button>
-                <button
-                  id="connectWalletConnect"
-                  className="common_button"
-                  onClick={onConnectWalletConnect}
-                ></button>
-              </>
-            )
-          }
+                  id={name}
+                  disabled={disabled}
+                  key={name}
+                  onClick={() => {
+                    setActivatingConnector(currentConnector);
+                    activate(connectorsByName[name]);
+                  }}
+                >
+                </button>
+              );
+            }
+            return <></>
+          })}
           {
             (walletData && !userData) && (
               <div className="form">

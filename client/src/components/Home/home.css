@@ -1,8 +1,8 @@
-.button-container nav .common_button#connectMeteMaskWallet::before {
+.button-container nav .common_button#Injected::before {
   content: 'CONNECT WALLET';
 }
 
-.button-container nav .common_button#connectWalletConnect::before {
+.button-container nav .common_button#WalletConnect::before {
   content: 'WALLET CONNECT';
 }
 
