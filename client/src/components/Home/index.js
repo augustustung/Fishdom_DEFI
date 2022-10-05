@@ -66,7 +66,7 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
   useInactiveListener(!triedEager || !!activatingConnector);
 
   React.useEffect(() => {
-    if (!(!triedEager || !!activatingConnector)) {
+    if (!(!triedEager || !!activatingConnector) && library) {
       let walletData = library
         .getSigner(account)
       setWalletData(walletData)
