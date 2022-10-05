@@ -102,7 +102,7 @@ async function _preBuy(provider, txHash, userData) {
     return undefined;
   }
 
-  if (!(txConfirmed && txConfirmed.from === userData.walletAddress)) {
+  if (!(txConfirmed && txConfirmed.from.toLowerCase() === userData.walletAddress)) {
     console.log('invalid buyer');
     return undefined;
   }

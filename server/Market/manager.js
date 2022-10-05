@@ -38,6 +38,7 @@ async function buyItem(req, res) {
       return res.status(500).json({ msg: "failed" });
     }
   } catch (error) {
+    console.log(__filename, error);
     return res.status(500).json({ msg: "failed" });
   }
 }
