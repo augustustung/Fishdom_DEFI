@@ -15,19 +15,22 @@ import chains from '../../constant/chain';
 
 let gameFrame = 0;
 
-function Home({ route, setRoute, userData, setUserData, walletData, setWalletData }) {
+function Home({ route, setRoute, userData, setUserData }) {
   const canvasRef = useRef()
   const [ctx, setCtx] = useState()
   const context = useWeb3React();
+
   const {
     connector,
     activate,
     deactivate,
     account,
     error,
-    library
+    library,
+    active,
+    chainId
   } = context;
-
+  const SIGN_MESSAGE = `Hello! Welcome to Fishdom DEFI, ${account}`
 
   // handle logic to recognize the connector currently being activated
   const [activatingConnector, setActivatingConnector] = React.useState();
@@ -39,7 +42,7 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
   }, [activatingConnector, connector]);
 
   React.useEffect(() => {
-    const REQUIRED_CHAIN = chains.find(chain => chain.chainId === (process.env.NODE_ENV === 'production' ? 56 : 97));
+    const REQUIRED_CHAIN = chains.find(chain => chain.chainId === parseInt(process.env.REACT_APP_NETWORK_ID));
     if (error && error instanceof UnsupportedChainIdError) {
       MetaMaskFunctions.switchChain('0x' + Number(REQUIRED_CHAIN.chainId).toString(16)).catch(error => {
         if (error.code === 4902) {
@@ -64,14 +67,6 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
 
   // handle logic to connect in reaction to certain events on the injected ethereum provider, if it exists
   useInactiveListener(!triedEager || !!activatingConnector);
-
-  React.useEffect(() => {
-    if (!(!triedEager || !!activatingConnector) && library) {
-      let walletData = library
-        .getSigner(account)
-      setWalletData(walletData)
-    }
-  }, [triedEager, activatingConnector])
 
   React.useEffect(() => {
     console.log('running');
@@ -353,33 +348,37 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
 
 
   useEffect(() => {
-    const getDataUser = async (address) => {
+    const getDataUser = async (signature) => {
       let userData = await Request.send({
         method: "POST",
         path: "/api/users/login",
         data: {
-          walletAddress: address
+          walletAddress: account,
+          signature: signature,
+          chainId: chainId,
+          message: SIGN_MESSAGE
         }
       })
-      if (userData && userData.msg && userData.msg === "NOT_FOUND") {
+      if (userData && userData.msg && userData.msg === "INVALID_SIGNATRUE") {
         setUserData(undefined)
+        toast.error("Invalid signature")
       } else {
-        let formatCleanData = {
+        setUserData({
           ...userData.user,
           token: userData.token
-        }
-        setUserData(formatCleanData)
+        })
       }
     }
-
-    if (walletData && walletData._address) {
-      getDataUser(walletData._address)
+    if (active && !userData) {
+      library.getSigner(account)
+        .signMessage(SIGN_MESSAGE)
+        .then(getDataUser)
     }
-  }, [walletData])
+  }, [active, userData])
 
   async function handleBuyTurn() {
-    const turn = window.prompt("How many turns?");
-    if (parseInt(turn) === NaN) {
+    const turn = window.prompt("How many turn do you want to buy?");
+    if (isNaN(turn)) {
       return;
     }
     Request.send({
@@ -418,13 +417,6 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
 
   function handleClick(goTo) {
     switch (goTo) {
-      case "LOGOUT": {
-        localStorage.clear()
-        setUserData(undefined)
-        setWalletData(undefined)
-        deactivate();
-        break
-      }
       case "BUY TURN": {
         handleBuyTurn()
         break;
@@ -460,18 +452,6 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
     }
   }
 
-  const onRegisterNewAccount = async (values) => {
-    let userDetail = await Request.send({
-      method: "POST",
-      path: "/api/users/register",
-      data: {
-        ...values,
-        walletAddress: walletData._address
-      }
-    });
-    setUserData(userDetail)
-  }
-
   return (
     <container>
       <canvas id="game" width={CANVAS_WIDTH} height={CANVAS_HEIGHT} ref={canvasRef}></canvas>
@@ -482,7 +462,7 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
             const connected = currentConnector === connector;
             const disabled = !triedEager || !!activatingConnector || connected || !!error;
 
-            if (!walletData && !userData) {
+            if (!active && !userData) {
               return (
                 <button
                   className="common_button"
@@ -500,47 +480,20 @@ function Home({ route, setRoute, userData, setUserData, walletData, setWalletDat
             return <></>
           })}
           {
-            (walletData && !userData) && (
-              <div className="form">
-                <Form
-                  name="basic"
-                  layout="vertical"
-                  onFinish={onRegisterNewAccount}
-                  // onFinishFailed={onFinishFailed}
-                  autoComplete="off"
-                >
-                  <Form.Item
-                    label="Name"
-                    name="name"
-                    rules={[{ required: true, message: 'Please input your name!' }]}
-                  >
-                    <Input />
-                  </Form.Item>
-
-                  <Form.Item
-                    label="Password"
-                    name="password"
-                    rules={[{ required: true, message: 'Please input your password!' }]}
-                  >
-                    <Input.Password />
-                  </Form.Item>
-                  <Form.Item className="center">
-                    <Button type="primary" htmlType="submit">
-                      Submit
-                    </Button>
-                  </Form.Item>
-                </Form>
+            (activate && !userData) && (
+              <div className="loading-userdata">
+                <div className="dot-spin" />
+                Retrieving user data
               </div>
             )
           }
           {
-            (walletData && userData) && (
+            (active && userData) && (
               <>
                 <button className="common_button" onClick={() => handleClick("/play")} />
                 <button className="common_button" onClick={() => handleClick("/leader-board")}></button>
                 <button className="common_button" onClick={() => handleClick("BUY TURN")}></button>
                 <button className="common_button" onClick={() => handleClick("INVENTORY")}></button>
-                <button className="common_button" onClick={() => handleClick("LOGOUT")}></button>
               </>
             )
           }

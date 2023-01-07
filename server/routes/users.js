@@ -1,54 +1,40 @@
 const router = require("express").Router();
 const User = require("../models/userModel");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require("../middlewares/auth");
 const manager = require('../Deposit/manager');
-
-router.post('/register', async (req, res) => {
-  //validation
-  if (!req.body.name || !req.body.password) {
-    return res.status(400).json({ msg: "Please enter all fields!" });
-  }
-  if (req.body.name.length > 15) {
-    return res.status(400).json({ msg: "Name length is 15 characters MAX!" });
-  }
-  if (!req.body.walletAddress) {
-    return res.status(400).json({ msg: "Invalid wallet address" });
-  }
-
-  bcrypt.genSalt(10, function (err, salt) {
-    bcrypt.hash(req.body.password, salt, function (err, hash) {
-      // Store hash in your password DB.
-      const newUser = new User({
-        name: req.body.name,
-        password: hash,
-        walletAddress: req.body.walletAddress.toLowerCase()
-      });
-      newUser
-        .save()
-        .then((user) => {
-          const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-          res.json({
-            user,
-            token
-          })
-        })
-        .catch((err) => res.status(400).json("Error: " + err));
-    });
-  });
-});
+const { ethers } = require("ethers");
 
 router.post('/login', async (req, res) => {
-  const user = await User.findOne({ walletAddress: req.body.walletAddress.toLowerCase() });
-  if (!user) {
-    return res.status(200).json({ msg: "NOT_FOUND" })
-  } else {
+  try {
+    const message = req.body.message
+    const signature = req.body.signature
+    const chainId = req.body.chainId
+    const walletAddress = req.body.walletAddress
+    if (chainId !== parseInt(process.env.NETWORK_ID)) {
+      res.status(500).json({ msg: "INVALID_CHAIN_ID" })
+      return
+    }
+    const signerAddr = ethers.utils.verifyMessage(message, signature);
+    if (!walletAddress === signerAddr) {
+      res.status(500).json({ msg: "INVALID_SIGNER" })
+      return
+    }
+    let user = await User.findOne({ walletAddress: walletAddress.toLowerCase() });
+    if (!user) {
+      user = new User({ 
+        walletAddress: walletAddress.toLowerCase(),
+      });
+      await user.save();
+    } 
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
     res.json({
       token: token,
       user: user,
     });
+  } catch (error) {
+    console(__filename, error);
+    res.status(500).json({ msg: "failed" })
   }
 });
 

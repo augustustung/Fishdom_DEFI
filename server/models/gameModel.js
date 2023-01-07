@@ -3,7 +3,6 @@ const mongoose = require('mongoose')
 const scoreSchema = mongoose.Schema({
   userId: {
     type: mongoose.Types.ObjectId,
-    // ref: 'User',
     required: true
   },
   score: {

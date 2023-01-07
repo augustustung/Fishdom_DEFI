@@ -22,28 +22,22 @@
   content: 'INVENTORY';
 }
 
-.button-container nav .common_button:nth-child(5)::before {
-  content: 'LOG OUT';
-}
-
 .button-container nav {
   width: 250px;
 }
 
-.form {
-  background-color: cornflowerblue;
-  padding: 12px;
-  border-radius: 5px;
-}
-
-.form label {
-  color:  #fff !important;
-}
-
-.form .center {
+.loading-userdata {
+  background-color: #fff;
+  padding: 24px;
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 24px;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 500;
 }
+
 
 .turn {
   position: absolute;
