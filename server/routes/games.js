@@ -1,3 +1,4 @@
+require('dotenv').config();
 const router = require("express").Router();
 const auth = require("../middlewares/auth");
 const ScoreModel = require('../models/gameModel');
@@ -7,7 +8,7 @@ const moment = require('moment');
 const path = require('path');
 const { ethers } = require('ethers');
 const FishdomNFT = require('../contracts/FishdomNFT.sol/FishdomNFT.json');
-require('dotenv').config();
+const UtilFunctions = require('../utils');
 
 router.get("/leader-board", auth, async (req, res) => {
   const leaderBoardData = await ScoreModel.aggregate([
@@ -113,39 +114,39 @@ router.post("/save-score", auth, async (req, res) => {
 });
 
 router.post("/mint", auth, async (req, res) => {
-  let nftId = req.body.nftId;
-  let existingNFT = await NFTModel.findOne({
-    nftId: nftId
-  });
+  let amount = req.body.amount;
 
-  if (existingNFT) {
-    return res.status(500).json({ msg: "existing nft" });
-  }
-  let userId = req.user._id;
-
-  let userData = await UserModel.findById(userId);
+  let adminWallet = process.env.OWNER_ADDRESS.toLowerCase()
+  let userData = await UserModel.findOne({ walletAddress: adminWallet });
   if (!userData) {
     return res.status(500).json({ msg: 'failed' });
   }
 
   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_ENDPOINT)
+  const signer = new ethers.Wallet(process.env.OWNER_PK, provider)
   const contractInstance = new ethers.Contract(
     FishdomNFT.networks[97].address,
     FishdomNFT.abi,
-    provider
+    signer
   );
 
-  let ownerOf = await contractInstance.ownerOf(nftId);
-  if (ownerOf !== userData.walletAddress) {
-    return res.status(500).json({ msg: 'not owner' });
+  const mintTx = await contractInstance.mint(parseInt(amount));
+  await mintTx.wait(1)
+  const { eventData } = await UtilFunctions.decodeTxData(provider, mintTx.hash, [`event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)`])
+  if (!eventData) {
+    return res.status(500).json({ msg: 'failed' });
   }
 
-  await NFTModel.create({
-    walletAddress: userData.walletAddress.toLowerCase(),
-    nftId: nftId.toString()
+  const result = await NFTModel.create({
+    walletAddress: adminWallet,
+    nftId: eventData.args['tokenId'].toString()
   })
+  if (result) {
+    return res.status(200).json({ data: result });
+  } else {
+    return res.status(500).json({ msg: "failed" });
+  }
 
-  return res.status(200).json({ msg: 'success' });
 });
 
 router.post("/getListNFT", auth, async (req, res) => {

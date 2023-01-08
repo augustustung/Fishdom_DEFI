@@ -38,7 +38,7 @@ async function _decodeAndGetBalance(provider, txHash, userData) {
       }
       let receiver = _handleGetReceiver(txConfirmed.logs[0].topics[2]);
       // check if receiver === merchant address
-      if (receiver === process.env.BSC_WALLET_ADDRESS.toLowerCase()) {
+      if (receiver === process.env.BENEFICIARY_ADDRESS.toLowerCase()) {
         resolve(amount);
       } else {
         resolve(undefined);
@@ -75,7 +75,7 @@ async function handleWithraw(walletAddress, amount) {
   try {
     const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_ENDPOINT)
     const signer = new ethers.Wallet(
-      process.env.BSC_WALLET_PK,
+      process.env.BENEFICIARY_PK,
       provider
     );
     const contractInstance = new ethers.Contract(FishdomToken.networks[97].address, FishdomToken.abi, signer);

@@ -29,7 +29,6 @@ async function decodeTxData(provider, txHash, abiEvent) {
         resolve(undefined);
         return;
       }
-
       let logsData = txConfirmed.logs;
       let iface = new ethers.utils.Interface(abiEvent);
       let log = iface.parseLog(logsData[logsData.length - 1]);
