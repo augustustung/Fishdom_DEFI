@@ -115,32 +115,48 @@ router.post("/save-score", auth, async (req, res) => {
 
 router.post("/mint", auth, async (req, res) => {
   let amount = req.body.amount;
-
+  let nftId = req.body.nftId;
   let adminWallet = process.env.OWNER_ADDRESS.toLowerCase()
-  let userData = await UserModel.findOne({ walletAddress: adminWallet });
-  if (!userData) {
-    return res.status(500).json({ msg: 'failed' });
+  if (!nftId) {
+    const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_ENDPOINT)
+    const signer = new ethers.Wallet(process.env.OWNER_PK, provider)
+    const contractInstance = new ethers.Contract(
+      FishdomNFT.networks[97].address,
+      FishdomNFT.abi,
+      signer
+    );
+
+    const mintTx = await contractInstance.mint(parseInt(amount));
+    console.log(mintTx);
+    const confirmedTx = await mintTx.wait(1)
+    console.log('confirmed')
+    const decodedData = await UtilFunctions.decodeTxData(provider, mintTx.hash, [`event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)`], { skipVerify: true, confirmedTx: confirmedTx, mintAmount: parseInt(amount) })
+    if (!decodedData) {
+      return res.status(500).json({ msg: 'failed' });
+    }
+
+    for (let event of decodedData.eventData) {
+      if (!nftId) {
+        nftId = [event.args['tokenId'].toString()]
+      } else {
+        nftId.push(event.args['tokenId'].toString())
+      }
+    }
+  } else {
+    nftId = JSON.parse(nftId)
+    for (let _nftId of nftId) {
+      const existedNFT = await NFTModel.findOne({ nftId: _nftId })
+      if (existedNFT) {
+        return res.status(500).json({ msg: "Existed NFT: " + _nftId })
+      }
+    }
   }
 
-  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_ENDPOINT)
-  const signer = new ethers.Wallet(process.env.OWNER_PK, provider)
-  const contractInstance = new ethers.Contract(
-    FishdomNFT.networks[97].address,
-    FishdomNFT.abi,
-    signer
-  );
-
-  const mintTx = await contractInstance.mint(parseInt(amount));
-  await mintTx.wait(1)
-  const { eventData } = await UtilFunctions.decodeTxData(provider, mintTx.hash, [`event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)`])
-  if (!eventData) {
-    return res.status(500).json({ msg: 'failed' });
-  }
-
-  const result = await NFTModel.create({
+  const insertData = nftId.map(_nft => ({
     walletAddress: adminWallet,
-    nftId: eventData.args['tokenId'].toString()
-  })
+    nftId: _nft
+  }))
+  const result = await NFTModel.create(insertData)
   if (result) {
     return res.status(200).json({ data: result });
   } else {

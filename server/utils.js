@@ -13,25 +13,40 @@ const { ethers } = require('ethers');
       )
  * @returns { eventData, txUncofirmed, txConfirmed }
  */
-async function decodeTxData(provider, txHash, abiEvent) {
+async function decodeTxData(provider, txHash, abiEvent, options) {
   return new Promise(async (resolve) => {
     try {
-      // get tx unconfirm
-      let txUncofirmed = await provider.getTransaction(txHash).catch(() => undefined);
-      if (!txUncofirmed) {
-        resolve(undefined);
-        return;
-      }
-      // check if tx confirmed
-      let txConfirmed = await txUncofirmed.wait(1).catch(() => undefined);
-      if (!txConfirmed) {
-        console.info("tx hasn't confirmed yet");
-        resolve(undefined);
-        return;
+      let txUncofirmed, txConfirmed
+      if (!options) {
+        // get tx unconfirm
+        txUncofirmed = await provider.getTransaction(txHash).catch(() => undefined);
+        if (!txUncofirmed) {
+          resolve(undefined);
+          return;
+        }
+        // check if tx confirmed
+        txConfirmed = await txUncofirmed.wait(1).catch(() => undefined);
+        if (!txConfirmed) {
+          console.info("tx hasn't confirmed yet");
+          resolve(undefined);
+          return;
+        }
+      } else if (options.skipVerify) {
+        txConfirmed = options.confirmedTx
       }
       let logsData = txConfirmed.logs;
       let iface = new ethers.utils.Interface(abiEvent);
-      let log = iface.parseLog(logsData[logsData.length - 1]);
+      let log
+      if (options.mintAmount) {
+        for (let i = logsData.length - options.mintAmount; i <= logsData.length - 1; i++) {
+          const parsedData = iface.parseLog(logsData[i])
+          if (!log) {
+            log = [parsedData];
+          } else {
+            log.push(parsedData)
+          }
+        }
+      }
 
       resolve({
         eventData: log,
