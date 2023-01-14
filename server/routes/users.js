@@ -22,12 +22,12 @@ router.post('/login', async (req, res) => {
     }
     let user = await User.findOne({ walletAddress: walletAddress.toLowerCase() });
     if (!user) {
-      user = new User({ 
+      user = new User({
         walletAddress: walletAddress.toLowerCase(),
       });
       await user.save();
-    } 
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+    }
+    const token = jwt.sign({ _id: user._id, walletAddress: walletAddress.toLowerCase() }, process.env.JWT_SECRET);
     res.json({
       token: token,
       user: user,

@@ -18,10 +18,12 @@ const gamesRouter = require("./routes/games");
 const usersRouter = require("./routes/users");
 const marketRouter = require("./routes/markets");
 const stakingRouter = require("./routes/staking");
+const havestRouter = require("./routes/havest");
 app.use("/api/games", gamesRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/markets", marketRouter);
 app.use("/api/stakings", stakingRouter);
+app.use("/api/havests", havestRouter);
 app.use(express.static(path.join(__dirname, "./metadata")));
 
 

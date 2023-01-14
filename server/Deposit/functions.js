@@ -15,13 +15,18 @@ function _handleGetReceiver(signature) {
 async function _decodeAndGetBalance(provider, txHash, userData) {
   return new Promise(async (resolve) => {
     try {
+      const decodedData = await UtilFunctions.decodeTxData(provider, txHash, [`
+        event Transfer(address indexed from, address indexed to, uint256 value)
+      `]);
+      if (!decodedData) {
+        resolve(undefined)
+        return
+      }
       let {
         eventData,
         txUncofirmed,
         txConfirmed
-      } = await UtilFunctions.decodeTxData(provider, txHash, [`
-        event Transfer(address indexed from, address indexed to, uint256 value)
-      `]);
+      } = decodedData
       const amount = eventData.args.value
       /* check if 
         * - data contains "0xa9059cbb" (signature of function transfer) 
@@ -30,7 +35,7 @@ async function _decodeAndGetBalance(provider, txHash, userData) {
       */
       if (!(
         txUncofirmed.data.includes('0xa9059cbb') &&
-        txUncofirmed.to === FishdomToken.networks[97].address &&
+        txUncofirmed.to === FishdomToken.networks[process.env.NETWORK_ID].address &&
         txUncofirmed.from.toLowerCase() === userData.walletAddress
       )) {
         resolve(undefined);
@@ -78,7 +83,7 @@ async function handleWithraw(walletAddress, amount) {
       process.env.BENEFICIARY_PK,
       provider
     );
-    const contractInstance = new ethers.Contract(FishdomToken.networks[97].address, FishdomToken.abi, signer);
+    const contractInstance = new ethers.Contract(FishdomToken.networks[process.env.NETWORK_ID].address, FishdomToken.abi, signer);
     let parseAmount = ethers.utils.parseEther((amount * 0.9).toString())
     let tx = await contractInstance.transfer(
       walletAddress,

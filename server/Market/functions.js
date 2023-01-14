@@ -23,7 +23,7 @@ async function _getDetailItem(provider, txHash, userData) {
 
   if (eventData && eventData.args && eventData.args.length > 0) {
     if (!(
-      txUncofirmed.to === FishdomMarket.networks[97].address &&
+      txUncofirmed.to === FishdomMarket.networks[process.env.NETWORK_ID].address &&
       txUncofirmed.from.toLowerCase() === userData.walletAddress
     )) {
       throw "invalid sender";
@@ -35,7 +35,7 @@ async function _getDetailItem(provider, txHash, userData) {
     return {
       itemId: eventData.args.itemId.toString(),
       tokenId: eventData.args.tokenId.toString(),
-      seller: eventData.args.seller,
+      seller: eventData.args.seller.toLowerCase(),
       price: ethers.utils.formatEther(eventData.args.price.toString(), 18)
     }
   } else {
@@ -67,7 +67,7 @@ async function handleSellItem(txHash, userId) {
         });
         await NFTModel.updateOne(
           { nftId: data.tokenId },
-          { walletAddress: FishdomMarket.networks[97].address }
+          { walletAddress: FishdomMarket.networks[process.env.NETWORK_ID].address.toLowerCase() }
         );
         resolve('success');
       } else {
@@ -97,7 +97,7 @@ async function _preBuy(provider, txHash, userData) {
     ]
   );
 
-  if (!(txConfirmed && txConfirmed.to === FishdomMarket.networks[97].address)) {
+  if (!(txConfirmed && txConfirmed.to === FishdomMarket.networks[process.env.NETWORK_ID].address)) {
     console.log('invalid contract');
     return undefined;
   }
@@ -112,9 +112,9 @@ async function _preBuy(provider, txHash, userData) {
     return {
       itemId: args.itemId.toString(),
       tokenId: args.tokenId.toString(),
-      seller: args.seller,
+      seller: args.seller.toLowerCase(),
       price: args.price.toString(),
-      buyer: args.buyer
+      buyer: args.buyer.toLowerCase()
     }
   }
   return undefined;
@@ -196,7 +196,7 @@ async function handleWithdraw(txHash, userId) {
         )`]
       );
 
-      if (!(txConfirmed && txConfirmed.to === FishdomMarket.networks[97].address)) {
+      if (!(txConfirmed && txConfirmed.to === FishdomMarket.networks[process.env.NETWORK_ID].address)) {
         console.log('invalid contract');
         return undefined;
       }

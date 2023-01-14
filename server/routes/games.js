@@ -116,21 +116,30 @@ router.post("/save-score", auth, async (req, res) => {
 router.post("/mint", auth, async (req, res) => {
   let amount = req.body.amount;
   let nftId = req.body.nftId;
+  let txHash = req.body.txHash;
+
   let adminWallet = process.env.OWNER_ADDRESS.toLowerCase()
   if (!nftId) {
     const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_ENDPOINT)
     const signer = new ethers.Wallet(process.env.OWNER_PK, provider)
     const contractInstance = new ethers.Contract(
-      FishdomNFT.networks[97].address,
+      FishdomNFT.networks[process.env.NETWORK_ID].address,
       FishdomNFT.abi,
       signer
     );
-
-    const mintTx = await contractInstance.mint(parseInt(amount));
-    console.log(mintTx);
-    const confirmedTx = await mintTx.wait(1)
-    console.log('confirmed')
-    const decodedData = await UtilFunctions.decodeTxData(provider, mintTx.hash, [`event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)`], { skipVerify: true, confirmedTx: confirmedTx, mintAmount: parseInt(amount) })
+    let _hash, _skipVerify, _confirmedTx
+    if (!txHash) {
+      const mintTx = await contractInstance.mint(parseInt(amount));
+      console.log(mintTx);
+      _confirmedTx = await mintTx.wait(1)
+      console.log('confirmed')
+      _hash = mintTx.hash
+      _skipVerify = true
+    } else {
+      _skipVerify = false
+      _hash = txHash;
+    }
+    const decodedData = await UtilFunctions.decodeTxData(provider, _hash, [`event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)`], { skipVerify: _skipVerify, confirmedTx: _confirmedTx, mintAmount: parseInt(amount) })
     if (!decodedData) {
       return res.status(500).json({ msg: 'failed' });
     }

@@ -13,11 +13,11 @@ const { ethers } = require('ethers');
       )
  * @returns { eventData, txUncofirmed, txConfirmed }
  */
-async function decodeTxData(provider, txHash, abiEvent, options) {
+async function decodeTxData(provider, txHash, abiEvent, options = { skipVerify: false }) {
   return new Promise(async (resolve) => {
     try {
       let txUncofirmed, txConfirmed
-      if (!options) {
+      if (!options.skipVerify) {
         // get tx unconfirm
         txUncofirmed = await provider.getTransaction(txHash).catch(() => undefined);
         if (!txUncofirmed) {
@@ -31,19 +31,27 @@ async function decodeTxData(provider, txHash, abiEvent, options) {
           resolve(undefined);
           return;
         }
-      } else if (options.skipVerify) {
+      } else {
         txConfirmed = options.confirmedTx
       }
       let logsData = txConfirmed.logs;
       let iface = new ethers.utils.Interface(abiEvent);
       let log
       if (options.mintAmount) {
-        for (let i = logsData.length - options.mintAmount; i <= logsData.length - 1; i++) {
+        for (let i = logsData.length - options.mintAmount - 1; i <= logsData.length - 2; i++) {
           const parsedData = iface.parseLog(logsData[i])
           if (!log) {
             log = [parsedData];
           } else {
             log.push(parsedData)
+          }
+        }
+      } else {
+        for (let _log of logsData) {
+          try {
+            log = iface.parseLog(_log)
+          } catch (error) {
+            continue
           }
         }
       }

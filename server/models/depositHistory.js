@@ -7,7 +7,7 @@ const depositHistory = mongoose.Schema({
     required: true
   },
   txHash: {
-    type: Number,
+    type: String,
     default: 0
   },
   amount: {

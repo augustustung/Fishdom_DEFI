@@ -8,6 +8,6 @@ router.post('/buy', auth, manager.buyItem);
 
 router.post("/withdraw", auth, manager.withdraw);
 
-router.post("/get", manager.getList);
+router.post("/get", auth, manager.getList);
 
 module.exports = router;

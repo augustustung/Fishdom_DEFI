@@ -8,6 +8,6 @@ router.post('/unstake', auth, manager.unstake);
 
 router.post("/claim", auth, manager.claim);
 
-router.post("/get", manager.getList);
+router.post("/get", auth, manager.getList);
 
 module.exports = router;
