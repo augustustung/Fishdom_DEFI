@@ -2,8 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../../const';
 import './home.css';
 import Request from '../../Axios'
-import { Button, Form, Input } from 'antd';
-import { toast } from "react-toastify";
+import { toast, Slide } from "react-toastify";
 import { connectorsByName } from '../../connector';
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core';
 import {
@@ -361,7 +360,10 @@ function Home({ route, setRoute, userData, setUserData }) {
       })
       if (userData && userData.msg && userData.msg === "INVALID_SIGNATRUE") {
         setUserData(undefined)
-        toast.error("Invalid signature")
+        toast.error(
+          "Invalid signature",
+          { transition: Slide, position: 'top-center' }
+        )
       } else {
         setUserData({
           ...userData.user,
@@ -373,12 +375,14 @@ function Home({ route, setRoute, userData, setUserData }) {
       library.getSigner(account)
         .signMessage(SIGN_MESSAGE)
         .then(getDataUser)
+        .catch(deactivate)
     }
   }, [active, userData])
 
   async function handleBuyTurn() {
-    const turn = window.prompt("How many turn do you want to buy?");
-    if (isNaN(turn)) {
+    let turn = window.prompt("How many turn do you want to buy?");
+
+    if (isNaN(parseInt(turn)) || parseInt(turn) === 0) {
       return;
     }
     Request.send({
@@ -386,16 +390,21 @@ function Home({ route, setRoute, userData, setUserData }) {
       path: "/api/games/buy-turn",
       data: {
         turn: parseInt(turn)
+      },
+      headers: {
+        'authorization': `Bearer ${userData.token}`
       }
     }).then((res) => {
       if (res && res.msg && res.msg === 'ok') {
-        toast.success('Buy turn success')
+        toast.success('Buy turn success',
+          { transition: Slide, position: 'top-center' })
         setUserData({
           playTurn: userData.playTurn + parseInt(turn),
-          balance: userData.balance - parseFloat(1000 * parseInt(turn))
+          balance: userData.balance - parseFloat(100 * parseInt(turn))
         })
       } else {
-        toast.error("Buy error");
+        toast.error("Buy error",
+          { transition: Slide, position: 'top-center' });
       }
     })
   }
@@ -410,7 +419,8 @@ function Home({ route, setRoute, userData, setUserData }) {
           playTurn: userData.playTurn - 1
         })
       } else {
-        toast.error("error from server");
+        toast.error("error from server",
+          { transition: Slide, position: 'top-center' });
       }
     })
   }
@@ -424,9 +434,11 @@ function Home({ route, setRoute, userData, setUserData }) {
       case '/play': {
         console.log(userData?.playTurn)
         if (!(userData?.playTurn)) {
-          toast.error("You have no turn to play")
+          toast.error("You have no turn to play",
+            { transition: Slide, position: 'top-center' })
         } else if (!(userData?.selectedNFT)) {
-          toast.error("Please select an FdF NFT to play")
+          toast.error("Please select an FdF NFT to play",
+            { transition: Slide, position: 'top-center' })
         } else {
           handleDecreasingTurn();
           setRoute('/play')
@@ -462,7 +474,7 @@ function Home({ route, setRoute, userData, setUserData }) {
             const connected = currentConnector === connector;
             const disabled = !triedEager || !!activatingConnector || connected || !!error;
 
-            if (!active && !userData) {
+            if (!active) {
               return (
                 <button
                   className="common_button"
@@ -480,7 +492,7 @@ function Home({ route, setRoute, userData, setUserData }) {
             return <></>
           })}
           {
-            (activate && !userData) && (
+            (active && !userData) && (
               <div className="loading-userdata">
                 <div className="dot-spin" />
                 Retrieving user data

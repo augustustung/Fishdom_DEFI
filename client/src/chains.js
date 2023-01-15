@@ -1,44 +1,60 @@
-const ETH = {
-  name: "Ether",
-  symbol: "ETH",
-  decimals: 18,
-};
-const MATIC = {
-  name: "Matic",
-  symbol: "MATIC",
-  decimals: 18,
-};
-function isExtendedChainInformation(chainInformation) {
-  return !!chainInformation.nativeCurrency;
-}
-export function getAddChainParameters(chainId) {
-  const chainInformation = CHAINS[chainId];
-  if (isExtendedChainInformation(chainInformation)) {
-    return {
-      chainId,
-      chainName: chainInformation.name,
-      nativeCurrency: chainInformation.nativeCurrency,
-      rpcUrls: chainInformation.urls,
-      blockExplorerUrls: chainInformation.blockExplorerUrls,
-    };
-  } else {
-    return chainId;
-  }
-}
-export const CHAINS = {
-  97: {
-    urls: ["https://data-seed-prebsc-1-s3.binance.org:8545"],
-    name: "BNB testnet",
+// MORE INFORMATION VISIT: https://rpc.info
+
+export default [
+  {
+    chainId: 80001,
+    chainName: 'POLYGON Mumbai',
+    nativeCurrency: {
+      name: 'MATIC',
+      symbol: 'MATIC',
+      decimals: 18,
+    },
+    rpcUrls: ['https://rpc-mumbai.maticvigil.com'],
+    blockExplorerUrls: ['https://mumbai.polygonscan.com/'],
+    iconUrls: [''],
+    /* additional field */
+    type: 'TESTNET',
   },
-  // 42: {
-  //   urls: ["https://kovan.infura.io/v3/"],
-  //   name: "Kovan testnet",
+  // {
+  //   chainId: 43114,
+  //   chainName: 'Avalanche C Chain',
+  //   nativeCurrency: {
+  //     name: 'AVAX',
+  //     symbol: 'AVAX',
+  //     decimals: 18,
+  //   },
+  //   rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
+  //   blockExplorerUrls: ['https://snowtrace.io'],
+  //   iconUrls: [''],
+  //   /* additional field */
+  //   type: 'MAINNET',
   // },
-};
-export const URLS = Object.keys(CHAINS).reduce((accumulator, chainId) => {
-  const validURLs = CHAINS[Number(chainId)].urls;
-  if (validURLs.length) {
-    accumulator[Number(chainId)] = validURLs;
-  }
-  return accumulator;
-}, {});
+  // {
+  //   chainId: 56,
+  //   chainName: 'Binance Smart Chain',
+  //   nativeCurrency: {
+  //     name: 'BNB',
+  //     symbol: 'BNB',
+  //     decimals: 18,
+  //   },
+  //   rpcUrls: ['https://bsc-dataseed.binance.org/'],
+  //   blockExplorerUrls: ['https://bscscan.com'],
+  //   iconUrls: [''],
+  //   /* additional field */
+  //   type: 'MAINNET',
+  // },
+  // {
+  //   chainId: 97,
+  //   chainName: 'Binance Smart Chain Testnet',
+  //   nativeCurrency: {
+  //     name: 'BNB',
+  //     symbol: 'BNB',
+  //     decimals: 18,
+  //   },
+  //   rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'],
+  //   blockExplorerUrls: ['https://testnet.bscscan.com'],
+  //   iconUrls: [''],
+  //   /* additional field */
+  //   type: 'TESTNET',
+  // },
+];

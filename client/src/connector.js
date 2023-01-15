@@ -14,7 +14,7 @@ import { TrezorConnector } from '@web3-react/trezor-connector'
 import { WalletLinkConnector } from '@web3-react/walletlink-connector'
 */
 
-import chains from './constant/chain';
+import chains from './chains';
 
 /**
  * @type { [chainId: number]: string }

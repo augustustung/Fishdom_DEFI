@@ -65,23 +65,19 @@ function LeaderBoard({ route, setRoute }) {
   }, [ctx])
 
   useEffect(() => {
-    let isMounted = false;
     async function init() {
       let resDataLeaderBoard = await Request.send({
         method: "GET",
         path: "/api/games/leader-board"
       });
 
-      if (resDataLeaderBoard && resDataLeaderBoard.length > 0 && !isMounted) {
+      if (resDataLeaderBoard && resDataLeaderBoard.length > 0) {
         setDataLeaderBoard(resDataLeaderBoard)
       } else {
         setDataLeaderBoard([])
       }
     }
     init()
-    return () => {
-      isMounted = true;
-    }
   }, [])
 
   return (
@@ -98,7 +94,7 @@ function LeaderBoard({ route, setRoute }) {
                 dataLeaderBoard.map(item => {
                   return (
                     <li key={item.userWallet}>
-                      <mark>{item?.userName || ""}</mark>
+                      <mark>{item?.userWallet || ""}</mark>
                       <small>{item?.score || "0"}</small>
                     </li>
                   )

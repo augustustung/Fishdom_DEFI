@@ -1,5 +1,5 @@
 .button-container nav .common_button#Injected::before {
-  content: 'CONNECT WALLET';
+  content: 'METAMASK';
 }
 
 .button-container nav .common_button#WalletConnect::before {

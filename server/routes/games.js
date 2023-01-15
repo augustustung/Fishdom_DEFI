@@ -78,11 +78,12 @@ router.post("/buy-turn", auth, async (req, res) => {
   if (!req.body.turn) {
     return res.status(500).json({ msg: "Invalid number of turns " });
   }
+  const FEE = 100
   const user = await UserModel.findById(req.user._id);
-  if (user.balance >= 1000 * req.body.turn) {
+  if (user.balance >= FEE * req.body.turn) {
     await user.update({
       playTurn: user.playTurn + req.body.turn,
-      balance: user.balance - 1000 * req.body.turn
+      balance: user.balance - FEE * req.body.turn
     });
     await user.save();
     res.status(200).json({ msg: 'ok' });
@@ -109,7 +110,6 @@ router.post("/save-score", auth, async (req, res) => {
     userId: req.user._id,
     score: req.body.score
   });
-  console.log('save score', data)
   return res.status(200).json(data);
 });
 

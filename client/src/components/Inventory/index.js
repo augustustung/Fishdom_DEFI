@@ -2,10 +2,10 @@ import { useEffect, useState, memo, useCallback } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../../const';
 import './inventory.css';
 import Request from '../../Axios';
-import { toast } from 'react-toastify'
+import { toast, Slide } from 'react-toastify'
 
 function Inventory({ setRoute, userData, setUserData }) {
-  const [listNFT, setListNFT] = useState({ data: [], total: 0 })
+  const [listNFT, setListNFT] = useState({ data: [], count: 0 })
   const [filter, setFilter] = useState({ skip: 0, limit: 6 })
 
   const fetchData = useCallback(async (filter, cb) => {
@@ -28,7 +28,7 @@ function Inventory({ setRoute, userData, setUserData }) {
     return () => {
       isMounted = true
     }
-  }, [fetchData])
+  }, [])
 
   async function handleUpdateUser(id) {
     let res = await Request.send({
@@ -43,9 +43,15 @@ function Inventory({ setRoute, userData, setUserData }) {
 
     if (res && res.data) {
       setUserData(res.data)
-      toast.success("Selected NFT ID: " + id)
+      toast.success(
+        "Selected NFT ID: " + id,
+        { transition: Slide, position: 'top-center' }
+      )
     } else {
-      toast.error("Something went wrong. Please try again")
+      toast.error(
+        "Something went wrong. Please try again",
+        { transition: Slide, position: 'top-center' }
+      )
     }
   }
 
@@ -54,7 +60,7 @@ function Inventory({ setRoute, userData, setUserData }) {
 
     if (
       Math.ceil((scrollTop) + clientHeight) === scrollHeight &&
-      filter.skip < listNFT.total
+      filter.skip < listNFT.count
     ) {
       const newFilter = {
         ...filter,
@@ -63,10 +69,10 @@ function Inventory({ setRoute, userData, setUserData }) {
       setFilter(newFilter)
       fetchData(newFilter, (dataNFT) => {
         setListNFT((prev) => ({
-          total: dataNFT.total,
+          ...prev,
           data: [
             ...prev.data,
-            ...dataNFT.data
+            ...dataNFT.data,
           ]
         }))
       })
@@ -80,7 +86,7 @@ function Inventory({ setRoute, userData, setUserData }) {
         className="inventory-container"
         style={{
           width: CANVAS_WIDTH,
-          height: CANVAS_HEIGHT
+          height: CANVAS_HEIGHT - 30
         }}
         onScroll={handleOnScroll}
       >

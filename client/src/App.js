@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Home from './components/Home'
 import Play from './components/Play'
 import Inventory from './components/Inventory'
@@ -28,10 +28,11 @@ const LIST_ROUTE = [
   }
 ]
 
+const USER_DATA = JSON.parse(localStorage.getItem('_u_u_u_u_u_u_') || '{}')
 
 function App() {
   const [route, setRoute] = useState("/")
-  const [userData, setUserData] = useState()
+  const [userData, setUserData] = useState(USER_DATA)
   const web3Context = useWeb3React()
   let Component = LIST_ROUTE.find((item) => item.path === route)
 
@@ -45,11 +46,16 @@ function App() {
           ...prev,
           ...data
         }
-        localStorage.setItem('user-data', JSON.stringify(formatData))
+        localStorage.setItem('_u_u_u_u_u_u_', JSON.stringify(formatData))
         return formatData
       })
     }
   }
+  useEffect(() => {
+    if (web3Context.account) {
+      setGlobalUserData(undefined)
+    }
+  }, [web3Context.account])
 
   return (
     <>

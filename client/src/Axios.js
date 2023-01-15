@@ -15,7 +15,7 @@ function send({
     if (newUrl) {
       url = `${newUrl}`
     }
-    const dataString = window.localStorage.getItem('user-data')
+    const dataString = window.localStorage.getItem('_u_u_u_u_u_u_')
     if (dataString) {
       const newData = JSON.parse(dataString)
       headers["authorization"] = `Bearer ${newData.token}`
