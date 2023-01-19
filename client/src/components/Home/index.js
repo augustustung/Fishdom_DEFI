@@ -115,8 +115,10 @@ function Home({ route, setRoute, userData, setUserData }) {
       // Player
       const playerLeft = new Image();
       playerLeft.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-left.json` : '/img/fish-swim-left.png';
+      playerLeft.crossOrigin = "Anonymous";
       const playerRight = new Image();
       playerRight.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-right.json` : '/img/fish-swim-right.png';
+      playerRight.crossOrigin = "Anonymous";
 
       class Player {
         constructor() {

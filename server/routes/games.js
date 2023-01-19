@@ -110,6 +110,11 @@ router.post("/save-score", auth, async (req, res) => {
     userId: req.user._id,
     score: req.body.score
   });
+  let userData = await UserModel.findById(req.user._id)
+  if (userData) {
+    await userData.update({ balance: userData.balance + parseInt(score) })
+    await userData.save();
+  }
   return res.status(200).json(data);
 });
 

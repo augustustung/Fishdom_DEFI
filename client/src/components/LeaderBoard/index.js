@@ -62,7 +62,7 @@ function LeaderBoard({ route, setRoute }) {
       window.removeEventListener('mouseup', null, true);
       cancelAnimationFrame(requestAnimationFrameId)
     }
-  }, [ctx])
+  }, [ctx, route])
 
   useEffect(() => {
     async function init() {

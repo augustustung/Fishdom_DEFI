@@ -28,7 +28,9 @@ const LIST_ROUTE = [
   }
 ]
 
-const USER_DATA = JSON.parse(localStorage.getItem('_u_u_u_u_u_u_') || '{}')
+const USER_DATA = localStorage.getItem('_u_u_u_u_u_u_') ?
+  JSON.parse(localStorage.getItem('_u_u_u_u_u_u_')) :
+  null
 
 function App() {
   const [route, setRoute] = useState("/")
@@ -51,11 +53,6 @@ function App() {
       })
     }
   }
-  useEffect(() => {
-    if (web3Context.account) {
-      setGlobalUserData(undefined)
-    }
-  }, [web3Context.account])
 
   return (
     <>
