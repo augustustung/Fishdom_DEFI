@@ -81,7 +81,7 @@ async function payUserScore() {
 
 async function startSchedule() {
   console.info("startSchedule ", new Date());
-  CronInstance.schedule('* * * * *', payUserScore)
+  CronInstance.schedule('0 0 1 * *', payUserScore)
 }
 
 module.exports = startSchedule
