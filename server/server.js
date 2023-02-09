@@ -26,8 +26,9 @@ app.use("/api/stakings", stakingRouter);
 app.use("/api/havests", havestRouter);
 app.use(express.static(path.join(__dirname, "./metadata")));
 
-
-app.listen(port, () => {
+app.listen(port, async () => {
+  const Cronjob = require('./cron')
+  await Cronjob();
   console.log(`Example app listening at http://localhost:${port}`);
 });
 
