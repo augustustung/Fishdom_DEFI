@@ -20,7 +20,7 @@ async function getList(req, res) {
   let skip = req.body.skip || 0;
   let limit = req.body.limit || 20;
   let order = JSON.parse(req.body.order || "{ \"createdAt\": -1 }");
-  filter.seller = req.user.walletAddress;
+  // filter.seller = req.user.walletAddress;
   let data = await MarketFunctions.handleGetList(filter, skip, limit, order);
   if (data) {
     return res.status(200).json({ data })
