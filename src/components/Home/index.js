@@ -401,7 +401,7 @@ function Home({ route, setRoute, userData, setUserData }) {
           { transition: Slide, position: 'top-center' })
         setUserData(res.data)
       } else {
-        toast.error(`Buy error: ${res.error}`,
+        toast.error(`Buy error: ${res.error.replaceAll('_', ' ')}`,
           { transition: Slide, position: 'top-center' });
       }
     })

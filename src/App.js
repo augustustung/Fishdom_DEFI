@@ -55,17 +55,19 @@ function App() {
   }
 
   useEffect(() => {
-    Request.send({
-      method: "POST",
-      path: '/AppUsers/getDetailByWalletAddress',
-      data: {
-        walletAddress: userData.walletAddress
-      }
-    }).then(res => {
-      if (res && res.statusCode === 200) {
-        setGlobalUserData(res.data)
-      }
-    })
+    if (userData && userData.walletAddress) {
+      Request.send({
+       method: "POST",
+       path: '/AppUsers/getDetailByWalletAddress',
+       data: {
+         walletAddress: userData.walletAddress
+       }
+     }).then(res => {
+       if (res && res.statusCode === 200) {
+         setGlobalUserData(res.data)
+       }
+     })
+    }
   }, [])
 
   useEffect(() => {
@@ -92,7 +94,7 @@ function App() {
           {`Address:  ${web3Context.active ? web3Context.account : ""}`}
         </div>
         <div>
-          {`FdT Point Balance:  ${userData?.balance ? userData?.balance : "0"}`}
+          {`Point Balance:  ${userData?.balance ? userData?.balance : "0"}`}
         </div>
       </div>
       <Component.render
