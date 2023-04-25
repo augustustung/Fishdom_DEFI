@@ -45,9 +45,9 @@ function Play({ route, userData }) {
 
       // Player   
       const playerLeft = new Image();
-      playerLeft.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-left.json` : '/img/fish-swim-left.png';
+      playerLeft.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/NFT/playing/${userData.selectedNFT}-left` : '/img/fish-swim-left.png';
       const playerRight = new Image();
-      playerRight.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-right.json` : '/img/fish-swim-right.png';
+      playerRight.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/NFT/playing/${userData.selectedNFT}-right` : '/img/fish-swim-right.png';
 
 
       class Player {
@@ -542,7 +542,7 @@ function Play({ route, userData }) {
         onClick={() => {
           Request.send({
             method: "POST",
-            path: '/api/games/save-score',
+            path: '/Game/saveScore',
             data: {
               score: score
             }

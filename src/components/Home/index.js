@@ -114,10 +114,10 @@ function Home({ route, setRoute, userData, setUserData }) {
 
       // Player
       const playerLeft = new Image();
-      playerLeft.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-left.json` : '/img/fish-swim-left.png';
+      playerLeft.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/NFT/playing/${userData.selectedNFT}-left` : '/img/fish-swim-left.png';
       playerLeft.crossOrigin = "Anonymous";
       const playerRight = new Image();
-      playerRight.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/api/games/metadata/${userData.selectedNFT}-right.json` : '/img/fish-swim-right.png';
+      playerRight.src = (userData?.selectedNFT) ? `${process.env.REACT_APP_API}/NFT/playing/${userData.selectedNFT}-right` : '/img/fish-swim-right.png';
       playerRight.crossOrigin = "Anonymous";
 
       class Player {
@@ -323,7 +323,7 @@ function Home({ route, setRoute, userData, setUserData }) {
         player.draw();
         ctx.fillStyle = 'rgba(34,147,214,1)';
         ctx.font = '20px Georgia';
-        ctx.fillText(`YOUR TURN:  ${userData && userData.playTurn ? userData.playTurn : '0'}`, 10, 120);
+        ctx.fillText(`YOUR TURN:  ${userData && userData.playingTurn ? userData.playingTurn : '0'}`, 10, 120);
         gameFrame += 1;
         gameFrame = gameFrame >= 100 ? 0 : gameFrame
         if (route === '/') {
@@ -352,7 +352,7 @@ function Home({ route, setRoute, userData, setUserData }) {
     const getDataUser = async (signature) => {
       let userData = await Request.send({
         method: "POST",
-        path: "/api/users/login",
+        path: "/AppUsers/loginUser",
         data: {
           walletAddress: account,
           signature: signature,
@@ -360,20 +360,18 @@ function Home({ route, setRoute, userData, setUserData }) {
           message: SIGN_MESSAGE
         }
       })
-      if (userData && userData.msg && userData.msg === "INVALID_SIGNATRUE") {
+
+      if (userData && userData.error === "INVALID_SIGNATRUE") {
         setUserData(undefined)
         toast.error(
           "Invalid signature",
           { transition: Slide, position: 'top-center' }
         )
       } else {
-        setUserData({
-          ...userData.user,
-          token: userData.token
-        })
+        setUserData(userData.data)
       }
     }
-    if (active && !userData) {
+    if (active && (!userData || (userData && Object.keys(userData).length === 0))) {
       library.getSigner(account)
         .signMessage(SIGN_MESSAGE)
         .then(getDataUser)
@@ -383,29 +381,27 @@ function Home({ route, setRoute, userData, setUserData }) {
 
   async function handleBuyTurn() {
     let turn = window.prompt("How many turn do you want to buy?");
-
-    if (isNaN(parseInt(turn)) || parseInt(turn) === 0) {
+    turn = parseInt(turn)
+    if (isNaN(turn) || turn === 0) {
       return;
     }
+
     Request.send({
       method: "POST",
-      path: "/api/games/buy-turn",
+      path: "/Game/buyTurn",
       data: {
-        turn: parseInt(turn)
+        amount: parseInt(turn)
       },
       headers: {
         'authorization': `Bearer ${userData.token}`
       }
     }).then((res) => {
-      if (res && res.msg && res.msg === 'ok') {
+      if (res && res.statusCode === 200) {
         toast.success('Buy turn success',
           { transition: Slide, position: 'top-center' })
-        setUserData({
-          playTurn: userData.playTurn + parseInt(turn),
-          balance: userData.balance - parseFloat(100 * parseInt(turn))
-        })
+        setUserData(res.data)
       } else {
-        toast.error("Buy error",
+        toast.error(`Buy error: ${res.error}`,
           { transition: Slide, position: 'top-center' });
       }
     })
@@ -414,14 +410,14 @@ function Home({ route, setRoute, userData, setUserData }) {
   async function handleDecreasingTurn() {
     await Request.send({
       method: "POST",
-      path: "/api/games/play"
+      path: "/Game/play"
     }).then((res) => {
-      if (res && res.msg && res.msg === 'ok') {
+      if (res && res.statusCode === 200) {
         setUserData({
-          playTurn: userData.playTurn - 1
+          playingTurn: userData.playingTurn - 1
         })
       } else {
-        toast.error("error from server",
+        toast.error("Something went wrong!",
           { transition: Slide, position: 'top-center' });
       }
     })
@@ -434,8 +430,7 @@ function Home({ route, setRoute, userData, setUserData }) {
         break;
       }
       case '/play': {
-        console.log(userData?.playTurn)
-        if (!(userData?.playTurn)) {
+        if (!(userData?.playingTurn)) {
           toast.error("You have no turn to play",
             { transition: Slide, position: 'top-center' })
         } else if (!(userData?.selectedNFT)) {
@@ -494,7 +489,7 @@ function Home({ route, setRoute, userData, setUserData }) {
             return <></>
           })}
           {
-            (active && !userData) && (
+            (active && (!userData || (userData && Object.keys(userData).length === 0))) && (
               <div className="loading-userdata">
                 <div className="dot-spin" />
                 Retrieving user data
@@ -502,7 +497,7 @@ function Home({ route, setRoute, userData, setUserData }) {
             )
           }
           {
-            (active && userData) && (
+            (active && userData && Object.keys(userData).length > 0) && (
               <>
                 <button className="common_button" onClick={() => handleClick("/play")} />
                 <button className="common_button" onClick={() => handleClick("/leader-board")}></button>

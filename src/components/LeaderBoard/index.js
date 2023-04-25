@@ -66,13 +66,13 @@ function LeaderBoard({ route, setRoute }) {
 
   useEffect(() => {
     async function init() {
-      let resDataLeaderBoard = await Request.send({
-        method: "GET",
-        path: "/api/games/leader-board"
+      const res = await Request.send({
+        method: "POST",
+        path: "/Game/leaderboard"
       });
 
-      if (resDataLeaderBoard && resDataLeaderBoard.length > 0) {
-        setDataLeaderBoard(resDataLeaderBoard)
+      if (res && res.statusCode === 200) {
+        setDataLeaderBoard(res.data)
       } else {
         setDataLeaderBoard([])
       }
@@ -93,8 +93,8 @@ function LeaderBoard({ route, setRoute }) {
               {
                 dataLeaderBoard.map(item => {
                   return (
-                    <li key={item.userWallet}>
-                      <mark>{item?.userWallet || ""}</mark>
+                    <li key={item.walletAddress}>
+                      <mark>{item?.walletAddress || ""}</mark>
                       <small>{item?.score || "0"}</small>
                     </li>
                   )

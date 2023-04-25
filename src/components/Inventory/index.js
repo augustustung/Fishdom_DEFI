@@ -9,13 +9,13 @@ function Inventory({ setRoute, userData, setUserData }) {
   const [filter, setFilter] = useState({ skip: 0, limit: 6 })
 
   const fetchData = useCallback(async (filter, cb) => {
-    let dataNFT = await Request.send({
+    const res = await Request.send({
       method: "POST",
-      path: "/api/games/getListNFT",
+      path: "/NFT/getCollection",
       data: filter
     });
-    if (dataNFT) {
-      cb(dataNFT)
+    if (res && res.statusCode === 200) {
+      cb(res.data)
     }
   }, [filter])
 
@@ -33,16 +33,14 @@ function Inventory({ setRoute, userData, setUserData }) {
   async function handleUpdateUser(id) {
     let res = await Request.send({
       method: "POST",
-      path: "/api/users/update",
+      path: "/AppUsers/updateUserData",
       data: {
-        data: {
-          selectedNFT: parseInt(id)
-        }
+        selectedNFT: parseInt(id)
       }
     });
 
-    if (res && res.data) {
-      setUserData(res.data)
+    if (res && res.statusCode === 200) {
+      setUserData({ selectedNFT: parseInt(id) })
       toast.success(
         "Selected NFT ID: " + id,
         { transition: Slide, position: 'top-center' }
@@ -111,7 +109,7 @@ function Inventory({ setRoute, userData, setUserData }) {
                   `}
                   key={item.nftId}
                 >
-                  <img src={`${process.env.REACT_APP_API}/api/games/idle/${item.nftId}.json`} alt="nft" />
+                  <img src={`${process.env.REACT_APP_API}/NFT/idle/${item.nftId}`} alt="nft" />
                   <div>FdF ID: {item.nftId}</div>
                   <button onClick={() => handleUpdateUser(item.nftId)}>
                     {userData.selectedNFT === parseInt(item.nftId) ? "Used" : "Use"}

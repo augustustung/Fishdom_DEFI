@@ -7,7 +7,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
 import { useWeb3React } from "@web3-react/core";
-
+import Request from './Axios'
 
 const LIST_ROUTE = [
   {
@@ -39,7 +39,7 @@ function App() {
   let Component = LIST_ROUTE.find((item) => item.path === route)
 
   function setGlobalUserData(data) {
-    if (!data) {
+    if (!data || (data && Object.keys(data).length === 0)) {
       setUserData(undefined)
       localStorage.removeItem('user-data')
     } else {
@@ -53,6 +53,37 @@ function App() {
       })
     }
   }
+
+  useEffect(() => {
+    Request.send({
+      method: "POST",
+      path: '/AppUsers/getDetailByWalletAddress',
+      data: {
+        walletAddress: userData.walletAddress
+      }
+    }).then(res => {
+      if (res && res.statusCode === 200) {
+        setGlobalUserData(res.data)
+      }
+    })
+  }, [])
+
+  useEffect(() => {
+    const ethereum = window.ethereum
+    const handleAccountsChanged = (accounts /*: string[] */) => {
+      console.log("Handling 'accountsChanged' event with payload", accounts);
+      if (accounts.length > 0) {
+        localStorage.removeItem('_u_u_u_u_u_u_')
+        window.location.reload()
+      }      
+    };
+
+    ethereum.on('accountsChanged', handleAccountsChanged);
+    
+    return () => {
+      ethereum.removeListener('accountsChanged', handleAccountsChanged);
+    }
+  }, [])
 
   return (
     <>
