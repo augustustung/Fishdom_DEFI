@@ -1,20 +1,37 @@
 /*-------------------- Leaderboard --------------------*/
 .leaderboard {
   position: absolute;
-  top: 50%;
+  top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 530px;
+  width: 700px;
   height: 308px;
   background: linear-gradient(to bottom, #3a404d, #181c26);
   border-radius: 10px;
   box-shadow: 0 7px 30px rgba(62, 9, 11, .3);
 }
-.leaderboard h1 {
+.leaderboard .leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.leaderboard .leaderboard-header h1 {
   font-size: 18px;
   color: #e1e1e1;
   padding: 12px 13px 18px;
 }
+
+.leaderboard .leaderboard-header div {
+  font-size: 18px;
+  color: #e1e1e1;
+  padding: 12px 13px 18px;
+}
+
+.leaderboard .leaderboard-header span {
+  width: 130px;
+}
+
 .leaderboard h1 svg {
   width: 25px;
   height: 26px;
@@ -27,8 +44,9 @@
   counter-reset: leaderboard;
 }
 .leaderboard ol li {
-  position: relative;
-  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: 14px;
   counter-increment: leaderboard;
   padding: 18px 10px 18px 50px;
@@ -41,7 +59,7 @@
   content: counter(leaderboard);
   position: absolute;
   z-index: 2;
-  top: 15px;
+  top: 22px;
   left: 15px;
   width: 20px;
   height: 20px;
@@ -52,16 +70,12 @@
   text-align: center;
 }
 .leaderboard ol li mark {
-  position: absolute;
-  z-index: 2;
-  top: -4px;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  padding: 18px 10px 18px 50px;
   margin: 0;
   background: none;
   color: #fff;
+  width: 50%;
+  overflow: auto;
+  text-overflow: ellipsis;
 }
 .leaderboard ol li mark::before, .leaderboard ol li mark::after {
   content: '';
@@ -81,11 +95,10 @@
   border-right: 10px solid transparent;
 }
 .leaderboard ol li small {
-  position: relative;
-  z-index: 2;
-  display: block;
-  text-align: right;
+  text-align: left;
   color: #fff;
+  font-size: 12px;
+  width: 20%;
 }
 .leaderboard ol li::after {
   content: '';
@@ -158,16 +171,9 @@
 }
 .leaderboard ol li:hover {
   z-index: 2;
-  overflow: visible;
+  opacity: .9;
 }
-.leaderboard ol li:hover::after {
-  opacity: 1;
-  transform: scaleX(1.06) scaleY(1.03);
-}
-.leaderboard ol li:hover mark::before, .leaderboard ol li:hover mark::after {
-  opacity: 1;
-  transition: all 0.35s ease-in-out;
-}
+
 .the-most {
   position: fixed;
   z-index: 1;
@@ -195,9 +201,13 @@
 }
 
 .leader-board-container nav button {
-  top: 320px;
+  top: 350px;
 }
 
 .leader-board-container nav button::before {
   content: "Go back";
+}
+
+a {
+  color: #fff !important;
 }

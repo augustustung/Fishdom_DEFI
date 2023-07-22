@@ -26,5 +26,5 @@ export const walletconnect = new WalletConnectConnector({
 
 export const connectorsByName = {
   Injected: injected,
-  WalletConnect: walletconnect
+  // WalletConnect: walletconnect
 };

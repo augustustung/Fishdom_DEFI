@@ -67,17 +67,17 @@ function Home({ route, setRoute, userData, setUserData }) {
   // handle logic to connect in reaction to certain events on the injected ethereum provider, if it exists
   useInactiveListener(!triedEager || !!activatingConnector);
 
-  React.useEffect(() => {
-    console.log('running');
-    const logURI = uri => {
-      console.log('WalletConnect URI', uri);
-    };
-    connectorsByName.WalletConnect.on(URI_AVAILABLE, logURI);
+  // React.useEffect(() => {
+  //   console.log('running');
+  //   const logURI = uri => {
+  //     console.log('WalletConnect URI', uri);
+  //   };
+  //   connectorsByName.WalletConnect.on(URI_AVAILABLE, logURI);
 
-    return () => {
-      connectorsByName.WalletConnect.off(URI_AVAILABLE, logURI);
-    };
-  }, []);
+  //   return () => {
+  //     connectorsByName.WalletConnect.off(URI_AVAILABLE, logURI);
+  //   };
+  // }, []);
 
   useEffect(() => {
     let requestAnimationFrameId
@@ -195,10 +195,10 @@ function Home({ route, setRoute, userData, setUserData }) {
       let adjustY = -3;
       ctx.fillStyle = 'white';
       ctx.font = '17px Verdana';
-      ctx.fillText('Fd DEFI', 20, 42);
+      ctx.fillText('Fishdom DEFI', 20, 48);
       //ctx.font = '19px Verdana';
       //ctx.fillText('TEXT', 36, 49);
-      const textCoordinates = ctx.getImageData(0, 0, 100, 100);
+      const textCoordinates = ctx.getImageData(0, 0, 200, 100);
 
       class Particle2 {
         constructor(x, y) {

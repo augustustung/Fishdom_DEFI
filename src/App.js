@@ -6,7 +6,6 @@ import LeaderBoard from './components/LeaderBoard'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
-import { useWeb3React } from "@web3-react/core";
 import Request from './Axios'
 
 const LIST_ROUTE = [
@@ -35,7 +34,6 @@ const USER_DATA = localStorage.getItem('_u_u_u_u_u_u_') ?
 function App() {
   const [route, setRoute] = useState("/")
   const [userData, setUserData] = useState(USER_DATA)
-  const web3Context = useWeb3React()
   let Component = LIST_ROUTE.find((item) => item.path === route)
 
   function setGlobalUserData(data) {
@@ -90,12 +88,25 @@ function App() {
   return (
     <>
       <div className="info-user">
-        <div>
-          {`Address:  ${web3Context.active ? web3Context.account : ""}`}
-        </div>
-        <div>
-          {`Point Balance:  ${userData?.balance ? userData?.balance : "0"}`}
-        </div>
+        {
+          userData?.id && (
+            <>
+              <div>
+                Account:&nbsp;
+                <a href={process.env.REACT_APP_EXPLORER_URL +'address/' + userData.walletAddress} rel="noreferrer"  target="_blank">
+                  {userData.walletAddress.slice(0, 5) + '...' + userData.walletAddress.slice(-3)} 
+                </a>
+                {
+                  userData.fullName ? ` - ${userData.fullName}` : '' 
+                }
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center'}}>
+                {`Point:  ${userData?.balance ? userData?.balance : "0"}`}&nbsp;
+                <img src="/img/point.png" alt="point" />
+              </div>
+            </>
+          ) 
+        }
       </div>
       <Component.render
         route={route} setRoute={setRoute}
