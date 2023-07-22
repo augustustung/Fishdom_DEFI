@@ -9,7 +9,10 @@ let gameFrame = 0;
 function LeaderBoard({ route, setRoute }) {
   const canvasRef = useRef()
   const [ctx, setCtx] = useState()
-  const [dataLeaderBoard, setDataLeaderBoard] = useState([])
+  const [dataLeaderBoard, setDataLeaderBoard] = useState({
+    leaderBoard: [], 
+    rank: {}
+  })
 
   useEffect(() => {
     let requestAnimationFrameId
@@ -76,7 +79,10 @@ function LeaderBoard({ route, setRoute }) {
       if (res && res.statusCode === 200) {
         setDataLeaderBoard(res.data)
       } else {
-        setDataLeaderBoard([])
+        setDataLeaderBoard({
+          leaderBoard: [], 
+          rank: {}
+        })
       }
     }
     init()
@@ -128,9 +134,26 @@ function LeaderBoard({ route, setRoute }) {
                 <span id="timer">1d 29m 39s</span>
               </div>
             </div>
+
+            <div className="w-100 user-rank">
+              Your score: &nbsp;
+              {dataLeaderBoard.rank?.score?.toLocaleString()} 
+              {
+                ` - Top: ${dataLeaderBoard.rank?.rank}` 
+              }
+              {
+                parseInt(dataLeaderBoard.rank?.rank) < 5 && (
+                  <>
+                    &nbsp;
+                    &nbsp;
+                    💪 Keep going 🎉🎊
+                  </>
+                )
+              }
+            </div>
             <ol>
               {
-                dataLeaderBoard.map((item, index) => {
+                dataLeaderBoard.leaderBoard.map((item, index) => {
                   return (
                     <li key={item.walletAddress} onClick={() => window.open(process.env.REACT_APP_EXPLORER_URL + 'address/' + item?.walletAddress, '_blank')}>
                       <mark>

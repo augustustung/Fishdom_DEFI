@@ -1243,4 +1243,6 @@ img[alt='point'] {
    }
  }
  
- /*# sourceMappingURL=three-dots.css.map */
+.w-100 {
+  width: 100%;
+}

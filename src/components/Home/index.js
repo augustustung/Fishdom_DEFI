@@ -5,9 +5,6 @@ import Request from '../../Axios'
 import { toast, Slide } from "react-toastify";
 import { connectorsByName } from '../../connector';
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core';
-import {
-  URI_AVAILABLE
-} from '@web3-react/walletconnect-connector';
 import { useEagerConnect, useInactiveListener } from '../../hooks';
 import * as MetaMaskFunctions from '../../metamask';
 import chains from '../../constant/chain';

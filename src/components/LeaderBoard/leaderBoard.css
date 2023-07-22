@@ -1,7 +1,7 @@
 /*-------------------- Leaderboard --------------------*/
 .leaderboard {
   position: absolute;
-  top: 40%;
+  top: 35%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 700px;
@@ -20,6 +20,7 @@
   font-size: 18px;
   color: #e1e1e1;
   padding: 12px 13px 18px;
+  margin: 0;
 }
 
 .leaderboard .leaderboard-header div {
@@ -30,6 +31,12 @@
 
 .leaderboard .leaderboard-header span {
   width: 130px;
+}
+
+.leaderboard .user-rank {
+  font-size: 18px;
+  color: #e1e1e1;
+  padding: 0px 13px 18px;
 }
 
 .leaderboard h1 svg {
@@ -201,7 +208,7 @@
 }
 
 .leader-board-container nav button {
-  top: 350px;
+  top: 380px;
 }
 
 .leader-board-container nav button::before {
