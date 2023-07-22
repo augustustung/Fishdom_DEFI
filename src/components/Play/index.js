@@ -129,10 +129,10 @@ function Play({ route, userData }) {
       // Bubbles
       const bubblesArray = [];
       const bubble = new Image();
-      bubble.src = 'https://i.ibb.co/ZX3thkw/pop2.png';
+      bubble.src = window.origin + '/img/bubble.png';
       class Bubble {
         constructor() {
-          this.x = Math.random() * CANVAS_HEIGHT;
+          this.x = randomIntFromInterval(100, CANVAS_WIDTH - 100);
           this.y = 0 - 50 - Math.random() * CANVAS_HEIGHT / 2;
           this.radius = 50;
           this.speed = Math.random() * -5 + -1;
