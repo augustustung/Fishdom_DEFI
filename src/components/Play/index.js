@@ -5,6 +5,7 @@ import Request from '../../Axios';
 import { toast } from "react-toastify";
 let score = 0;
 let gameFrame = 0;
+let enemyIntervalId;
 
 function randomIntFromInterval(min, max) { // min and max included 
   return Math.floor(Math.random() * (max - min + 1) + min)
@@ -198,7 +199,7 @@ function Play({ route, userData }) {
       let adjustY = -3;
       ctx.fillStyle = 'white';
       ctx.font = '17px Verdana';
-      ctx.fillText('Fishdom DEFI', 20, 48);
+      ctx.fillText('Fishdom DEFI', 20, 40);
       //ctx.font = '19px Verdana';
       //ctx.fillText('TEXT', 36, 49);
       const textCoordinates = ctx.getImageData(0, 0, 200, 100);
@@ -314,12 +315,9 @@ function Play({ route, userData }) {
         ctx.drawImage(background, BG.x2, BG.y, BG.width, BG.height);
       }
 
-
-      const enemyImage = new Image();
-      enemyImage.src = `/img/enemy_${randomIntFromInterval(1, 6)}.png`;
-
       class Enemy {
-        constructor() {
+        constructor({ img }) {
+          this.image = img;
           this.x = CANVAS_WIDTH + 200;
           this.y = Math.random() * (CANVAS_HEIGHT - 150) + 90;
           this.radius = 60;
@@ -337,7 +335,7 @@ function Play({ route, userData }) {
 
         draw() {
           ctx.drawImage(
-            enemyImage, this.frameX * this.spriteWidth,
+            this.image, this.frameX * this.spriteWidth,
             this.frameY * this.spriteHeight,
             this.spriteWidth, this.spriteHeight,
             this.x - this.offset.x, this.y - this.offset.y, this.spriteWidth / 3, this.spriteHeight / 3
@@ -353,10 +351,10 @@ function Play({ route, userData }) {
         update() {
           this.x -= this.speed;
           if (this.x < 0 - this.radius * 2) {
-            this.x = CANVAS_HEIGHT + 200;
-            this.y = Math.random() * (CANVAS_HEIGHT - 150) + 90;
+            this.x = CANVAS_WIDTH + 200;
+            this.y = randomIntFromInterval(0, CANVAS_HEIGHT);
             this.speed = Math.random() * 2 + 2;
-            enemyImage.src = `/img/enemy_${randomIntFromInterval(1, 6)}.png`;
+            this.image.src = `/img/enemy_${randomIntFromInterval(1, 6)}.png`;
           }
 
           if (gameFrame % 5 === 0) {
@@ -392,12 +390,34 @@ function Play({ route, userData }) {
         }
       }
 
+      const enemy1Image = new Image();
+      enemy1Image.src = `/img/enemy_${randomIntFromInterval(1, 6)}.png`;
+      const enemy2Image = new Image();
+      enemy2Image.src = `/img/enemy_${randomIntFromInterval(1, 6)}.png`;
+      const enemies = [
+        new Enemy({ img: enemy1Image }),
+        new Enemy({ img: enemy2Image })
+      ]
 
-      const enemy1 = new Enemy();
+      setInterval(() => {
+        const _enemyImage = new Image();
+        _enemyImage.src = `/img/enemy_${randomIntFromInterval(1, 6)}.png`;
+        if (enemies.length % 2 === 0) {
+          enemies.push(
+            new Enemy({ img: _enemyImage })
+          )
+        } else {
+          enemies.push(
+            new Enemy({ img: _enemyImage })
+          )
+        }
+      }, 10000);
 
       function handleEnemies() {
-        enemy1.draw();
-        enemy1.update();
+        enemies.forEach((_enemy) => {
+          _enemy.draw();
+          _enemy.update();
+        })
       }
 
       const killerBackground = new Image();
@@ -431,9 +451,9 @@ function Play({ route, userData }) {
 
         update() {
           this.x += this.speed;
-          if (this.x > CANVAS_HEIGHT + this.spriteWidth) {
+          if (this.x > CANVAS_WIDTH + this.spriteWidth) {
             this.x = -200;
-            this.y = Math.random() * (CANVAS_HEIGHT - 150) + 90;
+            this.y = randomIntFromInterval(0, CANVAS_HEIGHT);
             this.speed = Math.random() * 2 + 2;
           }
 
@@ -473,13 +493,29 @@ function Play({ route, userData }) {
         }
       }
 
-      const killer = new Killer();
+      const killers = [
+        new Killer(),
+        new Killer()
+      ];
+      
+      setInterval(() => {
+        if (killers.length % 2 === 0) {
+          killers.push(
+            new Killer()
+          )
+        } else {
+          killers.push(
+            new Killer()
+          )
+        }
+      }, 15000);
 
       function handleKillers() {
-        killer.draw();
-        killer.update()
+        killers.forEach((_killer) => {
+          _killer.draw();
+          _killer.update()
+        })
       }
-
 
       function handleGameOver() {
         let gameOverEl = document.querySelector(".gameOver")
@@ -492,7 +528,10 @@ function Play({ route, userData }) {
 
       // animation loop
       function animate() {
+        // clear content to re-draw
         ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        // bubble text
         for (let i = 0; i < bubbleTextArray.length; i++) {
           bubbleTextArray[i].draw();
           bubbleTextArray[i].update();
@@ -501,14 +540,17 @@ function Play({ route, userData }) {
         handleBubbles();
         handleEnemies();
         handleKillers();
+ 
         player.update();
         player.draw();
+        
+        // score
         ctx.fillStyle = 'rgba(34,147,214,1)';
         ctx.font = '20px Georgia';
         ctx.fillStyle = 'rgba(255,255,255,0.8)';
         ctx.fillText('score: ' + score, 141, 336);
-        ctx.fillStyle = 'rgba(34,147,214,1)';
-        ctx.fillText('score: ' + score, 140, 335);
+        
+        // game frame
         gameFrame += 1;
         gameFrame = gameFrame >= 100 ? 0 : gameFrame
 

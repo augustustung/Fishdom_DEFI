@@ -38,7 +38,7 @@ function send({
         const { status: statusCode, msg: data } = response
 
         if (statusCode === 401) {
-          toast.warn(data || 'Somethig was wrong')
+          toast.warn(data || 'Something was wrong')
           setTimeout(() => {
             window.localStorage.clear()
             window.location.reload()
