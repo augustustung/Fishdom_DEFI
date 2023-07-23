@@ -70,18 +70,20 @@ function App() {
 
   useEffect(() => {
     const ethereum = window.ethereum
-    const handleAccountsChanged = (accounts /*: string[] */) => {
-      console.log("Handling 'accountsChanged' event with payload", accounts);
-      if (accounts.length > 0) {
-        localStorage.removeItem('_u_u_u_u_u_u_')
-        window.location.reload()
-      }      
-    };
-
-    ethereum.on('accountsChanged', handleAccountsChanged);
-    
-    return () => {
-      ethereum.removeListener('accountsChanged', handleAccountsChanged);
+    if (ethereum) {
+      const handleAccountsChanged = (accounts /*: string[] */) => {
+        console.log("Handling 'accountsChanged' event with payload", accounts);
+        if (accounts.length > 0) {
+          localStorage.removeItem('_u_u_u_u_u_u_')
+          window.location.reload()
+        }      
+      };
+  
+      ethereum.on('accountsChanged', handleAccountsChanged);
+      
+      return () => {
+        ethereum.removeListener('accountsChanged', handleAccountsChanged);
+      }
     }
   }, [])
 

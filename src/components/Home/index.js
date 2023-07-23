@@ -476,8 +476,13 @@ function Home({ route, setRoute, userData, setUserData }) {
                   disabled={disabled}
                   key={name}
                   onClick={() => {
-                    setActivatingConnector(currentConnector);
-                    activate(connectorsByName[name]);
+                    if (window.ethereum) {
+                      setActivatingConnector(currentConnector);
+                      activate(connectorsByName[name]);
+                    } else {
+                      alert("Please install Metamask first")
+                      window.open('https://metamask.io/', '_blank')
+                    }
                   }}
                 >
                 </button>
