@@ -55,10 +55,9 @@ function Inventory({ setRoute, userData, setUserData }) {
 
   async function handleOnScroll(e) {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-
     if (
-      Math.ceil((scrollTop) + clientHeight) === scrollHeight &&
-      filter.skip < listNFT.count
+      Math.ceil(scrollTop + clientHeight) === scrollHeight &&
+      filter.skip < listNFT.total
     ) {
       const newFilter = {
         ...filter,
